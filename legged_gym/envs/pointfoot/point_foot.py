@@ -264,6 +264,9 @@ class PointFoot:
         self.episode_length_buf[env_ids] = 0
         self.reset_buf[env_ids] = 1
 
+    """
+    * Key function: compute reward
+    """
     def compute_reward(self):
         """ Compute rewards
             Calls each reward function which had a non-zero scale (processed in self._prepare_reward_function())
@@ -283,12 +286,16 @@ class PointFoot:
             self.rew_buf += rew
             self.episode_sums["termination"] += rew
 
+    """
+    * Key function: compute reward
+    """
     def compute_observations(self):
         """ Computes observations
         """
+        # 计算本体感知观测和特权观测
         self.compute_proprioceptive_observations()
         self.compute_privileged_observations()
-
+        # 给观测添加噪声
         self._add_noise_to_obs()
 
     def _add_noise_to_obs(self):
@@ -302,6 +309,9 @@ class PointFoot:
                     self.privileged_obs_buf[:, len(self.noise_scale_vec[0]):]) - 1) * privileged_extra_obs_noise_vec
                 self.privileged_obs_buf += torch.cat((obs_noise_buf, privileged_extra_obs_buf), dim=1)
 
+    """
+    * key function: compute privileged observations
+    """
     def compute_privileged_observations(self):
         if self.num_privileged_obs is not None:
             self._compose_privileged_obs_buf_no_height_measure()
@@ -321,6 +331,9 @@ class PointFoot:
                                              self.commands[:, :3] * self.commands_scale,
                                              ), dim=-1)
 
+    """
+    * key function: compute proprioceptive observations
+    """
     def compute_proprioceptive_observations(self):
         self._compose_proprioceptive_obs_buf_no_height_measure()
         if self.cfg.terrain.measure_heights_actor:
@@ -346,6 +359,9 @@ class PointFoot:
                                                  self.commands[:, :3] * self.commands_scale,
                                                  ), dim=-1)
 
+    """
+    Creates simulation, terrain and environments
+    """
     def create_sim(self):
         """ Creates simulation, terrain and environments
         """
@@ -588,8 +604,9 @@ class PointFoot:
         # robots that walked far enough progress to harder terains
         move_up = distance > self.terrain.env_length / 2
         # robots that walked less than half of their required distance go to simpler terrains
+        # 调整地形课程降级条件，鼓励挑战高难度
         move_down = (distance < torch.norm(self.commands[env_ids, :2],
-                                           dim=1) * self.max_episode_length_s * 0.5) * ~move_up
+                                           dim=1) * self.max_episode_length_s * 0.1) * ~move_up
         self.terrain_levels[env_ids] += 1 * move_up - 1 * move_down
         # Robots that solve the last level are sent to a random one
         self.terrain_levels[env_ids] = torch.where(self.terrain_levels[env_ids] >= self.max_terrain_level,
@@ -599,6 +616,7 @@ class PointFoot:
                                                               0))  # (the minumum level is zero)
         self.env_origins[env_ids] = self.terrain_origins[self.terrain_levels[env_ids], self.terrain_types[env_ids]]
 
+    # 速度指令课程升级
     def update_command_curriculum(self, env_ids):
         """ Implements a curriculum of increasing commands
 
@@ -606,6 +624,12 @@ class PointFoot:
             env_ids (List[int]): ids of environments being reset
         """
         # If the tracking reward is above 80% of the maximum, increase the range of commands
+        ################# 估算 #######################
+        # self.episode_sums["tracking_lin_vel"]: 记录每个 episode 的 reward_tracking_lin_vel
+        # self.max_episode_length: 1000
+        # 0.8*self.reward_scales["tracking_lin_vel"]: 0.8*20=16
+        # 也就是说，如果 tracking_lin_vel 的平均值超过 16*1000=16000，速度课程才会升级
+        # 由于 reward_tracking_lin_vel 是负指数形式的，本身双足的运动就不稳定，地形还这么复杂，速度课程升级条件几乎是不可能达到的
         if torch.mean(self.episode_sums["tracking_lin_vel"][env_ids]) / self.max_episode_length > 0.8 * \
                 self.reward_scales["tracking_lin_vel"]:
             self.command_ranges["lin_vel_x"][0] = np.clip(self.command_ranges["lin_vel_x"][0] - 0.5,
@@ -757,6 +781,7 @@ class PointFoot:
                     print(f"PD gain of joint {name} were not defined, setting them to zero")
         self.default_dof_pos = self.default_dof_pos.unsqueeze(0)
 
+    # 构造 reward function
     def _prepare_reward_function(self):
         """ Prepares a list of reward functions, whcih will be called to compute the total reward.
             Looks for self._reward_<REWARD_NAME>, where <REWARD_NAME> are names of all non zero reward scales in the cfg.
@@ -939,8 +964,11 @@ class PointFoot:
             self.env_origins = torch.zeros(self.num_envs, 3, device=self.device, requires_grad=False)
             # put robots at the origins defined by the terrain
             max_init_level = self.cfg.terrain.max_init_terrain_level
-            if not self.cfg.terrain.curriculum: max_init_level = self.cfg.terrain.num_rows - 1
-            self.terrain_levels = torch.randint(0, max_init_level + 1, (self.num_envs,), device=self.device)
+            if not self.cfg.terrain.curriculum: 
+                max_init_level = self.cfg.terrain.num_rows - 1
+            # self.terrain_levels = torch.randint(0, max_init_level + 1, (self.num_envs,), device=self.device)
+            # 调高初始地形课程难度
+            self.terrain_levels = torch.randint(2, max_init_level + 1, (self.num_envs,), device=self.device)
             self.terrain_types = torch.div(torch.arange(self.num_envs, device=self.device),
                                            (self.num_envs / self.cfg.terrain.num_cols), rounding_mode='floor').to(
                 torch.long)
@@ -960,14 +988,14 @@ class PointFoot:
             self.env_origins[:, 2] = 0.
 
     def _parse_cfg(self):
-        self.dt = self.cfg.control.decimation * self.sim_params.dt
+        self.dt = self.cfg.control.decimation * self.sim_params.dt  # dt=4*0.005=0.02
         self.obs_scales = self.cfg.normalization.obs_scales
         self.reward_scales = class_to_dict(self.cfg.rewards.scales)
         self.command_ranges = class_to_dict(self.cfg.commands.ranges)
         if self.cfg.terrain.mesh_type not in ['heightfield', 'trimesh']:
             self.cfg.terrain.curriculum = False
-        self.max_episode_length_s = self.cfg.env.episode_length_s
-        self.max_episode_length = np.ceil(self.max_episode_length_s / self.dt)
+        self.max_episode_length_s = self.cfg.env.episode_length_s   # max_episode_length_s=20
+        self.max_episode_length = np.ceil(self.max_episode_length_s / self.dt)  # max_episode_length=20/0.02=1000
 
         self.cfg.domain_rand.push_interval = np.ceil(self.cfg.domain_rand.push_interval_s / self.dt)
 
@@ -1164,10 +1192,12 @@ class PointFoot:
 
     def _reward_feet_air_time(self):
         # Reward steps between proper duration
+        # 脚刚触地时，计算上一步的脚悬空时间，惩罚悬空时间低于最小值的步态
         rew_airTime_below_min = torch.sum(
             torch.min(self.feet_air_time - self.cfg.rewards.min_feet_air_time,
                       torch.zeros_like(self.feet_air_time)) * self.first_contact,
             dim=1)
+        # 脚刚触地时，计算上一步的脚悬空时间，惩罚悬空时间高于最大值的步态
         rew_airTime_above_max = torch.sum(
             torch.min(self.cfg.rewards.max_feet_air_time - self.feet_air_time,
                       torch.zeros_like(self.feet_air_time)) * self.first_contact,

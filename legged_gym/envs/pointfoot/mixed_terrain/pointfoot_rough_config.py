@@ -33,15 +33,15 @@ class PointFootRoughCfg(BaseConfig):
         num_rows = 10  # number of terrain rows (levels)
         num_cols = 20  # number of terrain cols (types)
         # terrain types: [smooth slope, rough slope, stairs up, stairs down, discrete]
-        terrain_proportions = [0.1, 0.1, 0.35, 0.25, 0.2]
+        terrain_proportions = [0.1, 0.1, 0.35, 0.25, 0.2]   # 轮盘赌法，选中每种地形的概率
         # trimesh only:
         slope_treshold = 0.75  # slopes above this threshold will be corrected to vertical surfaces
 
     class commands:
-        curriculum = False
-        max_curriculum = 1.
-        num_commands = 4  # default: lin_vel_x, lin_vel_y, ang_vel_yaw, heading (in heading mode ang_vel_yaw is recomputed from heading error)
-        resampling_time = 10.  # time before command are changed[s]
+        curriculum = True     # default: False
+        max_curriculum = 3.   # default: 1
+        num_commands = 4      # default: lin_vel_x, lin_vel_y, ang_vel_yaw, heading (in heading mode ang_vel_yaw is recomputed from heading error)
+        resampling_time = 3.  # time before command are changed[s]
         heading_command = True  # if true: compute ang vel command from heading error
 
         class ranges:
@@ -137,29 +137,29 @@ class PointFootRoughCfg(BaseConfig):
 
     class rewards:
         class scales:
-            action_rate = -0.01
-            ang_vel_xy = -0.05
-            base_height = -10.0
-            collision = -50.0
-            dof_acc = -2.5e-07
-            dof_pos_limits = -0.0
-            dof_vel = -0.0
-            feet_air_time = 60
-            feet_contact_forces = -0.01
+            action_rate = -0.005     # default: -0.01 惩罚动作变化率
+            ang_vel_xy = -0.2      # default: -0.05 惩罚 x,y 方向的角速度（pitch 和 roll)
+            base_height = -40.0     # default: -10 惩罚 base_height 与 base_height_target 的差异
+            collision = -300.0      # default: -50 惩罚除 foot 外其他关节上的接触力
+            dof_acc = -2.5e-07      # default: -2.5e-07 惩罚关节加速度
+            dof_pos_limits = -0.0   # default: -0.0 惩罚关节位置超出限制
+            dof_vel = -0.0          # default: -0.0 惩罚关节速度
+            feet_air_time = 200      # default: 60 惩罚足部悬空时间不在期望区间内的步态
+            feet_contact_forces = -0.01     # default: -0.01 惩罚过大的足部接触力（没踩稳，使劲跺脚）
             feet_stumble = -0.0
-            lin_vel_z = -0.5
-            no_fly = 1.0
-            orientation = -5.0
-            stand_still = -1.0
+            lin_vel_z = -2          # default: -0.5 惩罚 z 方向运动的线速度（上下晃动）
+            no_fly = 1.0            # default: 1.0 奖励单脚触地？
+            orientation = -30.0      # default: -5.0 好像是在 base 不直立的惩罚
+            stand_still = -4.0     # default: -1.0 惩罚机器人不能保持静止
             termination = -0.0
-            torque_limits = -0.1
+            torque_limits = -0.5
             torques = -2.5e-05
-            tracking_ang_vel = 5
-            tracking_lin_vel = 10.0
-            unbalance_feet_air_time = -300.0
-            unbalance_feet_height = -60.0
+            tracking_ang_vel = 10.  # default: 5 跟踪期望角速度奖励
+            tracking_lin_vel = 20.0 # default: 10 跟踪期望线速度奖励
+            unbalance_feet_air_time = -300.0   # default: -300 惩罚足部悬空时间不平衡（步态踉跄）
+            unbalance_feet_height = -50.0    # default: -60 惩罚足部高度不平衡
             feet_distance = -100
-            survival = 100
+            survival = 400          # default: 100 奖励机器人存活时间
 
         base_height_target = 0.62
         soft_dof_pos_limit = 0.95  # percentage of urdf limits, values above this limit are penalized
@@ -168,9 +168,10 @@ class PointFootRoughCfg(BaseConfig):
         max_contact_force = 200.  # forces above this value are penalized
         only_positive_rewards = False  # if true negative total rewards are clipped at zero (avoids early termination problems)
         min_feet_distance = 0.1
+        # 这两个参数控制步态，每一步的悬空时间
         min_feet_air_time = 0.25
         max_feet_air_time = 0.65
-        tracking_sigma = 0.25  # tracking reward = exp(-error^2/sigma)
+        tracking_sigma = 0.25  # tracking reward = exp(-error^2/sigma)  # default: 0.25
 
     class normalization:
         class obs_scales:
@@ -216,7 +217,7 @@ class PointFootRoughCfg(BaseConfig):
             rest_offset = 0.0  # [m]
             bounce_threshold_velocity = 0.5  # 0.5 [m/s]
             max_depenetration_velocity = 1.0
-            max_gpu_contact_pairs = 2 ** 23  # 2**24 -> needed for 8000 envs and more
+            max_gpu_contact_pairs = 2 ** 24  # 2**24 -> needed for 8000 envs and more
             default_buffer_size_multiplier = 5
             contact_collection = 2  # 0: never, 1: last sub-step, 2: all sub-steps (default=2)
 
