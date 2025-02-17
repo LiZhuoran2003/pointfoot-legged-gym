@@ -31,12 +31,10 @@
     <link
             name="base_Link">
         <inertial>
-            <origin rpy="0 0 0" xyz="0.01233 0.00075 -0.00619"/>
-            <mass value="9.563"/>
-            <!-- <inertia ixx="114072.37E-06" ixy="358.31E-06" ixz="24740.39E-06"
-                     iyy="93069.48E-06" iyz="-519.61E-06" izz="84503.56E-06"/> -->
-            <inertia ixx="136590.556E-06" ixy="-112.830E-06" ixz="29836.42E-06"
-                     iyy="111139.956E-06" iyz="175.735E-06" izz="98152.136E-06"/>
+            <origin rpy="0 0 0" xyz="45.76E-03 0.14E-03 -163.98E-03"/>
+            <mass value="9.585"/>
+            <inertia ixx="140110.479E-06" ixy="534.939E-06" ixz="28184.116E-06"
+                     iyy="110641.449E-06" iyz="-27.278E-06" izz="98944.542E-06"/>
         </inertial>
         <visual>
             <origin
@@ -53,9 +51,9 @@
             </material>
         </visual>
         <collision>
-            <origin xyz="-0.005 0 0.08969" rpy="0 0 0"/>
+            <origin xyz="0.03 0 -0.072" rpy="0 0 0"/>
             <geometry>
-                <box size="0.28 0.24 0.20"/>
+                <box size="0.27 0.26 0.19"/>
             </geometry>
         </collision>
     </link>
@@ -90,12 +88,10 @@
     <link
             name="abad_L_Link">
         <inertial>
-            <origin rpy="0 0 0" xyz="-67.676E-03 44.613E-03 0.863E-03"/>
-            <mass value="1.556"/>
-            <!-- <inertia ixx="1656.04E-06" ixy="403.19E-06" ixz="-9.83E-06"
-                     iyy="2566.66E-06" iyz="-15.3E-06" izz="2283.42E-06"/> -->
-            <inertia ixx="1621.843E-06" ixy="402.1E-06" ixz="-22.295E-06"
-                     iyy="2577.378E-06" iyz="-6.003E-06" izz="2240.059E-06"/>
+            <origin rpy="0 0 0" xyz="-69.77E-03 44.79E-03 0.57E-03"/>
+            <mass value="1.469"/>
+            <inertia ixx="1555.384E-06" ixy="397.78E-06" ixz="-13.10E-06"
+                     iyy="2359.25E-06" iyz="-0.98E-06" izz="2080.92E-06"/>
         </inertial>
         <visual>
             <origin
@@ -122,7 +118,7 @@
             name="abad_L_Joint"
             type="revolute">
         <origin
-                xyz="39E-03 109.5E-03 -87.25E-03"
+                xyz="55.56E-03 105E-03 -260.2E-03"
                 rpy="0 0 0"/>
         <parent
                 link="base_Link"/>
@@ -135,10 +131,10 @@
     <link
             name="hip_L_Link">
         <inertial>
-            <origin rpy="0 0 0" xyz="-28.906E-03 -47.522E-03 -40.716E-03"/>
-            <mass value="2.330"/>
-            <inertia ixx="17854.401E-06" ixy="1686.919E-06" ixz="-9799.243E-06"
-                     iyy="24186.469E-06" iyz="2257.438E-06" izz="9807.208E-06"/>
+            <origin rpy="0 0 0" xyz="-28.69E-03 -47.7E-03 -39.92E-03"/>
+            <mass value="2.30"/>
+            <inertia ixx="16937.28E-06" ixy="1647.03E-06" ixz="-9232.53E-06"
+                     iyy="22853.28E-06" iyz="2202.40E-06" izz="9334.19E-06"/>
         </inertial>
         <visual>
             <origin
@@ -178,10 +174,10 @@
     <link
             name="knee_L_Link">
         <inertial>
-            <origin rpy="0 0 0" xyz="100.966E-03 2.245E-03 -169.973E-03"/>
-            <mass value="1.067"/>
-            <inertia ixx="11386.716E-06" ixy="-44.269E-06" ixz="6311.427E-06"
-                     iyy="15031.136E-06" iyz="77.469E-06" izz="4168.62E-06"/>
+            <origin rpy="0 0 0" xyz="114.52E-03 1.3E-03 -193.67E-03"/>
+            <mass value="1.22"/>
+            <inertia ixx="10938.43E-06" ixy="-7.87E-06" ixz="5986.5E-06"
+                     iyy="14358.12E-06" iyz="10.11E-06" izz="4087.65E-06"/>
         </inertial>
         <visual>
             <origin
@@ -208,7 +204,7 @@
             name="knee_L_Joint"
             type="revolute">
         <origin
-                xyz="-150E-03 -20.5E-03 -259.81E-03"
+                xyz="-0.1500 -0.0205 -0.25981"
                 rpy="0 0 0"/>
         <parent
                 link="hip_L_Link"/>
@@ -221,10 +217,10 @@
     <link
             name="ankle_L_Link">
         <inertial>
-            <origin rpy="0 0 0" xyz="-18.44E-03 0.56E-03 -30.99E-03"/>
-            <mass value="0.608" />
-            <inertia ixx="518.19E-06" ixy="24.822E-06" ixz="63.190E-06"
-                iyy="1736.063E-06" iyz="-14.547E-06" izz="1940.783E-06" />
+            <origin rpy="0 0 0" xyz="10.74E-03 -0.61E-03 -33.14E-03"/>
+            <mass value="0.62" />
+            <inertia ixx="525.46E-06" ixy="-3.51E-06" ixz="-51.36E-06"
+                iyy="1812.05E-06" iyz="6.54E-06" izz="1973.81E-06" />
         </inertial>
         <visual>
             <origin
@@ -259,7 +255,7 @@
             name="ankle_L_Joint"
             type="revolute">
         <origin
-                xyz="156E-03 0 -259.81E-03"
+                xyz="0.150 0 -0.25981"
                 rpy="0 0 0"/>
         <parent
                 link="knee_L_Link"/>
@@ -268,18 +264,17 @@
         <axis
                 xyz="0 -1 0"/>
 
-        <limit effort="20" lower="-1.11352" upper="1.11352" velocity="10"/>
+        <limit effort="20" lower="-1.15191730631626" upper="1.5707963267949" velocity="15"/>
+        <dynamics friction="0.01"/>
     </joint>
     
     <link
             name="abad_R_Link">
         <inertial>
-            <origin rpy="0 0 0" xyz="-67.676E-03 -44.613E-03 0.863E-03"/>
-            <mass value="1.556"/>
-            <!-- <inertia ixx="1656.04E-06" ixy="-403.19E-06" ixz="-9.83E-06"
-                     iyy="2566.66E-06" iyz="15.3E-06" izz="2283.42E-06"/> -->
-            <inertia ixx="1621.843E-06" ixy="-402.1E-06" ixz="-22.295E-06"
-                     iyy="2577.378E-06" iyz="6.003E-06" izz="2240.059E-06"/>
+            <origin rpy="0 0 0" xyz="-69.77E-03 -44.79E-03 0.57E-03"/>
+            <mass value="1.469"/>
+            <inertia ixx="1555.384E-06" ixy="-397.78E-06" ixz="-13.10E-06"
+                     iyy="2359.25E-06" iyz="0.98E-06" izz="2080.92E-06"/>
         </inertial>
         <visual>
             <origin
@@ -306,7 +301,7 @@
             name="abad_R_Joint"
             type="revolute">
         <origin
-                xyz="39E-03 -109.5E-03 -87.25E-03"
+                xyz="55.56E-03 -105E-03 -260.2E-03"
                 rpy="0 0 0"/>
         <parent
                 link="base_Link"/>
@@ -319,10 +314,10 @@
     <link
             name="hip_R_Link">
         <inertial>
-            <origin rpy="0 0 0" xyz="-28.906E-03 47.522E-03 -40.716E-03"/>
-            <mass value="2.330"/>
-            <inertia ixx="17854.401E-06" ixy="-1686.919E-06" ixz="-9799.243E-06"
-                    iyy="24186.469E-06" iyz="-2257.438E-06" izz="9807.208E-06"/>
+            <origin rpy="0 0 0" xyz="-28.69E-03 47.7E-03 -39.92E-03"/>
+            <mass value="2.30"/>
+            <inertia ixx="16937.28E-06" ixy="-1647.03E-06" ixz="-9232.53E-06"
+                     iyy="22853.28E-06" iyz="-2202.40E-06" izz="9334.19E-06"/>
         </inertial>
         <visual>
             <origin
@@ -362,10 +357,10 @@
     <link
             name="knee_R_Link">
         <inertial>
-            <origin rpy="0 0 0" xyz="100.966E-03 -2.245E-03 -169.973E-03"/>
-            <mass value="1.067"/>
-            <inertia ixx="11386.716E-06" ixy="44.269E-06" ixz="6311.427E-06"
-                    iyy="15031.136E-06" iyz="-77.469E-06" izz="4168.62E-06"/>
+            <origin rpy="0 0 0" xyz="114.52E-03 -1.3E-03 -193.67E-03"/>
+            <mass value="1.22"/>
+            <inertia ixx="10938.43E-06" ixy="7.87E-06" ixz="5986.5E-06"
+                     iyy="14358.12E-06" iyz="-10.11E-06" izz="4087.65E-06"/>
         </inertial>
         <visual>
             <origin
@@ -392,7 +387,7 @@
             name="knee_R_Joint"
             type="revolute">
         <origin
-                xyz="-150E-03 20.5E-03 -259.81E-03"
+                xyz="-0.1500 0.0205 -0.25981"
                 rpy="0 0 0"/>
         <parent
                 link="hip_R_Link"/>
@@ -405,10 +400,10 @@
     <link
             name="ankle_R_Link">
         <inertial>
-            <origin rpy="0 0 0" xyz="-18.44E-03 0.56E-03 -30.99E-03"/>
-            <mass value="0.608" />
-             <inertia ixx="518.19E-06" ixy="-24.822E-06" ixz="63.190E-06"
-                    iyy="1736.063E-06" iyz="14.547E-06" izz="1940.783E-06" />
+            <origin rpy="0 0 0" xyz="10.74E-03 0.61E-03 -33.14E-03"/>
+            <mass value="0.62" />
+            <inertia ixx="525.46E-06" ixy="3.51E-06" ixz="-51.36E-06"
+                iyy="1812.05E-06" iyz="-6.54E-06" izz="1973.81E-06" />
         </inertial>
         <visual>
             <origin
@@ -443,7 +438,7 @@
             name="ankle_R_Joint"
             type="revolute">
         <origin
-                xyz="156E-03 0 -259.81E-03"
+                xyz="0.150 0 -0.25981"
                 rpy="0 0 0"/>
         <parent
                 link="knee_R_Link"/>
@@ -452,6 +447,7 @@
         <axis
                 xyz="0 -1 0"/>
 
-        <limit effort="20" lower="-1.11352" upper="1.11352" velocity="10"/>
+        <limit effort="20" lower="-1.15191730631626" upper="1.5707963267949" velocity="15"/>
+        <dynamics friction="0.01"/>
     </joint>
 </robot>
