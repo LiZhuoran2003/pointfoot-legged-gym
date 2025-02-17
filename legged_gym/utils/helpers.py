@@ -130,6 +130,7 @@ def update_cfg_from_args(env_cfg, cfg_train, args):
         # num envs
         if args.num_envs is not None:
             env_cfg.env.num_envs = args.num_envs
+        print(f"num_envs: {env_cfg.env.num_envs}")
     if cfg_train is not None:
         if args.seed is not None:
             cfg_train.seed = args.seed
@@ -174,7 +175,7 @@ def get_args():
     args.sim_device_id = args.compute_device_id
     args.sim_device = args.sim_device_type
     if args.sim_device=='cuda':
-        args.sim_device += f":{args.sim_device_id}"
+        args.sim_device += f":{args.sim_device_id}" # cuda:0
     return args
 
 def export_policy_as_jit(actor_critic, path):

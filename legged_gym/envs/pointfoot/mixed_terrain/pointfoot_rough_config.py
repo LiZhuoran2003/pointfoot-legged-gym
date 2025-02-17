@@ -22,8 +22,8 @@ class PointFootRoughCfg(BaseConfig):
         # rough terrain only:
         measure_heights_actor = False
         measure_heights_critic = True
-        measured_points_x = [-0.5, -0.4, -0.3, -0.2, -0.1, 0., 0.1, 0.2, 0.3, 0.4, 
-                             0.5]  # 1mx1m rectangle (without center line)
+        # 1mx1m rectangle (without center line)
+        measured_points_x = [-0.5, -0.4, -0.3, -0.2, -0.1, 0., 0.1, 0.2, 0.3, 0.4, 0.5]  
         measured_points_y = [-0.5, -0.4, -0.3, -0.2, -0.1, 0., 0.1, 0.2, 0.3, 0.4, 0.5]
         selected = False  # select a unique terrain type and pass all arguments
         terrain_kwargs = None  # Dict of arguments for selected terrain
@@ -38,16 +38,16 @@ class PointFootRoughCfg(BaseConfig):
         slope_treshold = 0.75  # slopes above this threshold will be corrected to vertical surfaces
 
     class commands:
-        curriculum = False     # default: False
-        max_curriculum = 1.   # default: 1
-        num_commands = 4      # default: lin_vel_x, lin_vel_y, ang_vel_yaw, heading (in heading mode ang_vel_yaw is recomputed from heading error)
-        resampling_time = 3.  # time before command are changed[s]
+        curriculum = False
+        max_curriculum = 1.
+        num_commands = 4  # default: lin_vel_x, lin_vel_y, ang_vel_yaw, heading (in heading mode ang_vel_yaw is recomputed from heading error)
+        resampling_time = 5.  # time before command are changed[s]
         heading_command = True  # if true: compute ang vel command from heading error
 
         class ranges:
             lin_vel_x = [-1.0, 1.0]  # min max [m/s]
             lin_vel_y = [-0.2, 0.2]  # min max [m/s]
-            ang_vel_yaw = [-1, 1]  # min max [rad/s]
+            ang_vel_yaw = [-0.5, 0.5]  # min max [rad/s]
             heading = [-3.14, 3.14]
 
     class init_state:
@@ -103,7 +103,11 @@ class PointFootRoughCfg(BaseConfig):
         if not robot_type:
             print("Error: Please set the ROBOT_TYPE using 'export ROBOT_TYPE=<robot_type>'.")
             sys.exit(1)
-        file = '{LEGGED_GYM_ROOT_DIR}/resources/robots/pointfoot/' + robot_type + '/urdf/robot.urdf'
+        else:
+            print("ROBOT_TYPE is [", robot_type, "]")
+        
+        file = '/home/hiddenman/limx_rl/pointfoot-legged-gym/resources/robots/pointfoot/' + robot_type + '/urdf/robot.urdf'
+
         name = robot_type
         foot_name = 'foot'
         terminate_after_contacts_on = ["abad", "base"]
@@ -231,6 +235,7 @@ class PointFootRoughCfgPPO(BaseConfig):
 
     class policy:
         init_noise_std = 1.0
+        # 网络结构还是别乱动了
         actor_hidden_dims = [512, 256, 128]
         critic_hidden_dims = [512, 256, 128]
         activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid

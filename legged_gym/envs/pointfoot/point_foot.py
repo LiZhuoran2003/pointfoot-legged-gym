@@ -81,17 +81,15 @@ class PointFoot:
         self.viewer = None
 
         # if running with a viewer, set up keyboard shortcuts and camera
-        if self.headless == False:
+        if self.headless == False:  # 不是 headless 模式，允许可视化界面显示
             # subscribe to keyboard shortcuts
-            self.viewer = self.gym.create_viewer(
-                self.sim, gymapi.CameraProperties())
-            self.gym.subscribe_viewer_keyboard_event(
-                self.viewer, gymapi.KEY_ESCAPE, "QUIT")
-            self.gym.subscribe_viewer_keyboard_event(
-                self.viewer, gymapi.KEY_V, "toggle_viewer_sync")
+            self.viewer = self.gym.create_viewer(self.sim, gymapi.CameraProperties())                   # 创建一个可视化窗口
+            self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_ESCAPE, "QUIT")            # ESC键=QUIT
+            self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_V, "toggle_viewer_sync")   # V键=切换视图同步功能
         self._include_feet_height_rewards = self._check_if_include_feet_height_rewards()
         if not self.headless:
             self.set_camera(self.cfg.viewer.pos, self.cfg.viewer.lookat)
+
         self._init_buffers()
         self._prepare_reward_function()
         self.init_done = True
@@ -198,8 +196,11 @@ class PointFoot:
             self._draw_debug_vis()
 
     def _check_if_include_feet_height_rewards(self):
+        # 返回 self.cfg.rewards.scales 对象的所有属性和方法名称的列表。
+        # 列表推导式过滤掉以双下划线开头的属性（这些通常是内部属性），只保留公开的属性名称，结果存储在 members 列表中。
         members = [attr for attr in dir(self.cfg.rewards.scales) if not attr.startswith("__")]
         for scale in members:
+            # 遍历 members 列表中的每一个属性名称，检查是否包含与脚部高度相关的信息
             if "feet_height" in scale:
                 return True
         return False
@@ -350,6 +351,7 @@ class PointFoot:
         )
         return buf
 
+    # 模型输入observation no height
     def _compose_proprioceptive_obs_buf_no_height_measure(self):
         self.proprioceptive_obs_buf = torch.cat((self.base_ang_vel * self.obs_scales.ang_vel,
                                                  self.projected_gravity,    # 投影到 base 坐标系下的重力向量 

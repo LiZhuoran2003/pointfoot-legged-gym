@@ -80,17 +80,22 @@ class TaskRegistry():
         # if no args passed get command line arguments
         if args is None:
             args = get_args()
+        
         # check if there is a registered env with that name
         if name in self.task_classes:
             task_class = self.get_task_class(name)
+            print(f"Task with name {name} is registered, continue...")
         else:
             raise ValueError(f"Task with name: {name} was not registered")
+                
         if env_cfg is None:
             # load config files
             env_cfg, _ = self.get_cfgs(name)
+        
         # override cfg from args (if specified)
         env_cfg, _ = update_cfg_from_args(env_cfg, None, args)
         set_seed(env_cfg.seed)
+        
         # parse sim params (convert to dict first)
         sim_params = {"sim": class_to_dict(env_cfg.sim)}
         sim_params = parse_sim_params(args, sim_params)
@@ -102,7 +107,7 @@ class TaskRegistry():
         return env, env_cfg
 
     def make_alg_runner(self, env, name=None, args=None, train_cfg=None, log_root="default") -> Tuple[OnPolicyRunner, LeggedRobotCfgPPO]:
-        """ Creates the training algorithm  either from a registered namme or from the provided config file.
+        """ Creates the training algorithm either from a registered namme or from the provided config file.
 
         Args:
             env (isaacgym.VecTaskPython): The environment to train (TODO: remove from within the algorithm)
@@ -123,6 +128,7 @@ class TaskRegistry():
         # if no args passed get command line arguments
         if args is None:
             args = get_args()
+
         # if config files are passed use them, otherwise load from the name
         if train_cfg is None:
             if name is None:
@@ -132,6 +138,7 @@ class TaskRegistry():
         else:
             if name is not None:
                 print(f"'train_cfg' provided -> Ignoring 'name={name}'")
+
         # override cfg from args (if specified)
         _, train_cfg = update_cfg_from_args(None, train_cfg, args)
 

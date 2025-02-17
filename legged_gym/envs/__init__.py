@@ -41,6 +41,7 @@ from .pointfoot.point_foot import PointFoot
 
 from legged_gym.utils.task_registry import task_registry
 
+# 各个任务的训练配置
 task_registry.register("anymal_c_rough", Anymal, AnymalCRoughCfg(), AnymalCRoughCfgPPO())
 task_registry.register("anymal_c_flat", Anymal, AnymalCFlatCfg(), AnymalCFlatCfgPPO())
 task_registry.register("anymal_b", Anymal, AnymalBRoughCfg(), AnymalBRoughCfgPPO())
