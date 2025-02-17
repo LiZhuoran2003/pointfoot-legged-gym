@@ -1126,45 +1126,45 @@ class PointFoot:
 
     # ------------ reward functions----------------
     def _reward_lin_vel_z(self):
-        # Penalize z axis base linear velocity
+        # Penalize z axis base linear velocity，base z轴速度环
         return torch.square(self.base_lin_vel[:, 2])
 
     def _reward_ang_vel_xy(self):
-        # Penalize xy axes base angular velocity
+        # Penalize xy axes base angular velocity，base 的 roll 和 pitch 轴的速度环
         return torch.sum(torch.square(self.base_ang_vel[:, :2]), dim=1)
 
     def _reward_orientation(self):
-        # Penalize non flat base orientation
+        # Penalize non flat base orientation，base 的 roll 和 pitch 轴的位置环
         return torch.sum(torch.square(self.projected_gravity[:, :2]), dim=1)
 
     def _reward_base_height(self):
-        # Penalize base height away from target
+        # Penalize base height away from target，base z轴速度环
         base_height = torch.mean(self.root_states[:, 2].unsqueeze(1) - self.measured_heights, dim=1)
         return torch.square(base_height - self.cfg.rewards.base_height_target)
 
     def _reward_torques(self):
-        # Penalize torques
+        # Penalize torques，能耗惩罚。施加力矩越大，惩罚越大。torque 是对关节位置做 PD 控制计算得到的。
         return torch.sum(torch.square(self.torques), dim=1)
 
     def _reward_dof_vel(self):
-        # Penalize dof velocities
+        # Penalize dof velocities，关节速度环
         return torch.sum(torch.square(self.dof_vel), dim=1)
 
     def _reward_dof_acc(self):
-        # Penalize dof accelerations
+        # Penalize dof accelerations，关节加速度环
         return torch.sum(torch.square((self.last_dof_vel - self.dof_vel) / self.dt), dim=1)
 
     def _reward_action_rate(self):
-        # Penalize changes in actions
+        # Penalize changes in actions，动作变化惩罚，action 就是关节位置，所以这个相当于关节位置环
         return torch.sum(torch.square(self.last_actions - self.actions), dim=1)
 
     def _reward_collision(self):
-        # Penalize collisions on selected bodies
+        # Penalize collisions on selected bodies，惩罚除了足部以外的关节上的接触力
         return torch.sum(1. * (torch.norm(self.contact_forces[:, self.penalised_contact_indices, :], dim=-1) > 0.1),
                          dim=1)
 
     def _reward_termination(self):
-        # Terminal reward / penalty
+        # Terminal reward / penalty，
         return self.reset_buf * ~self.time_out_buf
 
     def _reward_dof_pos_limits(self):
@@ -1221,18 +1221,20 @@ class PointFoot:
         return 1. * single_contact
 
     def _reward_unbalance_feet_air_time(self):
+        # 惩罚足部悬空时间方差，鼓励悬空时间尽可能一致，步伐均匀
         return torch.var(self.last_feet_air_time, dim=-1)
 
     def _reward_unbalance_feet_height(self):
+        # 惩罚抬腿高度不一致，鼓励步伐均匀
         return torch.var(self.last_max_feet_height, dim=-1)
 
     def _reward_stumble(self):
-        # Penalize feet hitting vertical surfaces
+        # Penalize feet hitting vertical surfaces，这一项没用到，看起来是足部受到 x,y 方向的接触力 > 5 倍 z 方向接触力，说明机器人的脚磕到了墙
         return torch.any(torch.norm(self.contact_forces[:, self.feet_indices, :2], dim=2) > \
                          5 * torch.abs(self.contact_forces[:, self.feet_indices, 2]), dim=1)
 
     def _reward_stand_still(self):
-        # Penalize displacement and rotation at zero commands
+        # Penalize displacement and rotation at zero commands，惩罚机器人在速度指令很小的情况下乱动
         reward_lin = torch.abs(self.base_lin_vel[:, :2]) * (torch.abs(self.commands[:, :2]) < 0.1)
         reward_ang = (torch.abs(self.base_ang_vel[:, -1]) * (torch.abs(self.commands[:, 2]) < 0.1)).unsqueeze(dim=-1)
         return torch.sum(torch.cat((reward_lin, reward_ang), dim=-1), dim=-1)
@@ -1243,6 +1245,7 @@ class PointFoot:
                                      dim=-1) - self.cfg.rewards.max_contact_force).clip(min=0.), dim=1)
 
     def _reward_feet_distance(self):
+        # 鼓励两脚之间保持适当距离
         reward = 0
         for i in range(self.feet_state.shape[1] - 1):
             for j in range(i + 1, self.feet_state.shape[1]):
@@ -1253,4 +1256,5 @@ class PointFoot:
         return reward
 
     def _reward_survival(self):
+        # 存活奖励。episode_length 越长，奖励越大。
         return (~self.reset_buf).float() * self.dt

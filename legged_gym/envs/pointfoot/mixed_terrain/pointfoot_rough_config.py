@@ -2,7 +2,7 @@ from legged_gym.envs.base.base_config import BaseConfig
 
 class PointFootRoughCfg(BaseConfig):
     class env:
-        num_envs = 8192
+        num_envs = 1
         num_propriceptive_obs = 27
         num_privileged_obs = 148  # if not None a priviledge_obs_buf will be returned by step() (critic obs for assymetric training). None is returned otherwise
         num_actions = 6
@@ -240,9 +240,9 @@ class PointFootRoughCfgPPO(BaseConfig):
         critic_hidden_dims = [512, 256, 128]
         activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
         # only for 'ActorCriticRecurrent':
-        # rnn_type = 'lstm'
-        # rnn_hidden_size = 512
-        # rnn_num_layers = 1
+        rnn_type = 'lstm'
+        rnn_hidden_size = 512
+        rnn_num_layers = 1
 
     class algorithm:
         # training params
@@ -260,7 +260,7 @@ class PointFootRoughCfgPPO(BaseConfig):
         max_grad_norm = 1.
 
     class runner:
-        policy_class_name = 'ActorCritic'
+        policy_class_name = 'ActorCriticRecurrent'
         algorithm_class_name = 'PPO'
         num_steps_per_env = 24  # per iteration
         max_iterations = 100000  # number of policy updates
