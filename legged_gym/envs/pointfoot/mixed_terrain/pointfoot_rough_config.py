@@ -22,7 +22,7 @@ class PointFootRoughCfg(BaseConfig):
         # rough terrain only:
         measure_heights_actor = False
         measure_heights_critic = True
-        measured_points_x = [-0.5, -0.4, -0.3, -0.2, -0.1, 0., 0.1, 0.2, 0.3, 0.4,
+        measured_points_x = [-0.5, -0.4, -0.3, -0.2, -0.1, 0., 0.1, 0.2, 0.3, 0.4, 
                              0.5]  # 1mx1m rectangle (without center line)
         measured_points_y = [-0.5, -0.4, -0.3, -0.2, -0.1, 0., 0.1, 0.2, 0.3, 0.4, 0.5]
         selected = False  # select a unique terrain type and pass all arguments
@@ -38,8 +38,8 @@ class PointFootRoughCfg(BaseConfig):
         slope_treshold = 0.75  # slopes above this threshold will be corrected to vertical surfaces
 
     class commands:
-        curriculum = True     # default: False
-        max_curriculum = 3.   # default: 1
+        curriculum = False     # default: False
+        max_curriculum = 1.   # default: 1
         num_commands = 4      # default: lin_vel_x, lin_vel_y, ang_vel_yaw, heading (in heading mode ang_vel_yaw is recomputed from heading error)
         resampling_time = 3.  # time before command are changed[s]
         heading_command = True  # if true: compute ang vel command from heading error
@@ -155,11 +155,12 @@ class PointFootRoughCfg(BaseConfig):
             torque_limits = -0.5
             torques = -2.5e-05
             tracking_ang_vel = 10.  # default: 5 跟踪期望角速度奖励
-            tracking_lin_vel = 20.0 # default: 10 跟踪期望线速度奖励
-            unbalance_feet_air_time = -300.0   # default: -300 惩罚足部悬空时间不平衡（步态踉跄）
+            tracking_lin_vel_x = 40.0 # default: 10 跟踪期望线速度奖励
+            tracking_lin_vel_y = 10.0 # default: 10 跟踪期望线速度奖励
+            unbalance_feet_air_time = -1000.0   # default: -300 惩罚足部悬空时间不平衡（步态踉跄）
             unbalance_feet_height = -50.0    # default: -60 惩罚足部高度不平衡
-            feet_distance = -100
-            survival = 400          # default: 100 奖励机器人存活时间
+            feet_distance = -200
+            survival = 200          # default: 100 奖励机器人存活时间
 
         base_height_target = 0.62
         soft_dof_pos_limit = 0.95  # percentage of urdf limits, values above this limit are penalized
@@ -171,7 +172,9 @@ class PointFootRoughCfg(BaseConfig):
         # 这两个参数控制步态，每一步的悬空时间
         min_feet_air_time = 0.25
         max_feet_air_time = 0.65
-        tracking_sigma = 0.25  # tracking reward = exp(-error^2/sigma)  # default: 0.25
+        tracking_sigma_x = 0.1  # tracking reward = exp(-error^2/sigma)  # default: 0.25
+        tracking_sigma_y = 0.5  # tracking reward = exp(-error^2/sigma)  # default: 0.25
+        tracking_sigma_ang_vel = 0.25  # tracking reward = exp(-error^2/sigma)  # default: 0.25
 
     class normalization:
         class obs_scales:

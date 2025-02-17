@@ -353,7 +353,7 @@ class PointFoot:
 
     def _compose_proprioceptive_obs_buf_no_height_measure(self):
         self.proprioceptive_obs_buf = torch.cat((self.base_ang_vel * self.obs_scales.ang_vel,
-                                                 self.projected_gravity,
+                                                 self.projected_gravity,    # 投影到 base 坐标系下的重力向量 
                                                  (self.dof_pos - self.default_dof_pos) * self.obs_scales.dof_pos,
                                                  self.dof_vel * self.obs_scales.dof_vel,
                                                  self.actions,
@@ -631,12 +631,12 @@ class PointFoot:
         # 0.8*self.reward_scales["tracking_lin_vel"]: 0.8*20=16
         # 也就是说，如果 tracking_lin_vel 的平均值超过 16*1000=16000，速度课程才会升级
         # 由于 reward_tracking_lin_vel 是负指数形式的，本身双足的运动就不稳定，地形还这么复杂，速度课程升级条件几乎是不可能达到的
-        if torch.mean(self.episode_sums["tracking_lin_vel"][env_ids]) / self.max_episode_length > 0.8 * \
-                self.reward_scales["tracking_lin_vel"]:
-            self.command_ranges["lin_vel_x"][0] = np.clip(self.command_ranges["lin_vel_x"][0] - 0.5,
-                                                          -self.cfg.commands.max_curriculum, 0.)
-            self.command_ranges["lin_vel_x"][1] = np.clip(self.command_ranges["lin_vel_x"][1] + 0.5, 0.,
-                                                          self.cfg.commands.max_curriculum)
+        # if torch.mean(self.episode_sums["tracking_lin_vel"][env_ids]) / self.max_episode_length > 0.8 * \
+        #         self.reward_scales["tracking_lin_vel"]:
+        #     self.command_ranges["lin_vel_x"][0] = np.clip(self.command_ranges["lin_vel_x"][0] - 0.5,
+        #                                                   -self.cfg.commands.max_curriculum, 0.)
+        #     self.command_ranges["lin_vel_x"][1] = np.clip(self.command_ranges["lin_vel_x"][1] + 0.5, 0.,
+        #                                                   self.cfg.commands.max_curriculum)
 
     def _get_noise_scale_vec(self):
         """ Sets a vector used to scale the noise added to the observations.
@@ -652,6 +652,7 @@ class PointFoot:
         self.add_noise = self.cfg.noise.add_noise
         noise_scales = self.cfg.noise.noise_scales
         noise_level = self.cfg.noise.noise_level
+        # 这一部分做了修改，好像除去了对 lin_vel 添加的噪声
         obs_noise_vec[:3] = noise_scales.ang_vel * noise_level * self.obs_scales.ang_vel
         obs_noise_vec[3:6] = noise_scales.gravity * noise_level
         command_end_idx = 6 + self.cfg.commands.num_commands
@@ -700,6 +701,9 @@ class PointFoot:
         # create some wrapper tensors for different slices
         self.root_states = gymtorch.wrap_tensor(actor_root_state)
         self.dof_state = gymtorch.wrap_tensor(dof_state_tensor)
+        # 我在代码里没有找到在环境 step 时给 root_states 和 dof_state 赋值的操作
+        # 似乎是因为使用 GPU 加速，数据不会被复制到主机内存，而是直接在设备间传递，
+        # 从而减少了数据传输的开销。
         self.dof_pos = self.dof_state.view(self.num_envs, self.num_dof, 2)[..., 0]
         self.dof_vel = self.dof_state.view(self.num_envs, self.num_dof, 2)[..., 1]
         self.base_quat = self.root_states[:, 3:7]
@@ -1181,15 +1185,20 @@ class PointFoot:
         return torch.sum(
             (torch.abs(self.torques) - self.torque_limits * self.cfg.rewards.soft_torque_limit).clip(min=0.), dim=1)
 
-    def _reward_tracking_lin_vel(self):
-        # Tracking of linear velocity commands (xy axes)
-        lin_vel_error = torch.sum(torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2]), dim=1)
-        return torch.exp(-lin_vel_error / self.cfg.rewards.tracking_sigma)
+    def _reward_tracking_lin_vel_x(self):
+        # Tracking of linear velocity commands (x axes)
+        lin_vel_x_error = torch.square(self.commands[:, 0] - self.base_lin_vel[:, 0])
+        return torch.exp(-lin_vel_x_error / self.cfg.rewards.tracking_sigma_x)
+
+    def _reward_tracking_lin_vel_y(self):
+        # Tracking of linear velocity commands (y axes)
+        lin_vel_y_error = torch.square(self.commands[:, 1] - self.base_lin_vel[:, 1])
+        return torch.exp(-lin_vel_y_error / self.cfg.rewards.tracking_sigma_y)
 
     def _reward_tracking_ang_vel(self):
         # Tracking of angular velocity commands (yaw)
         ang_vel_error = torch.square(self.commands[:, 2] - self.base_ang_vel[:, 2])
-        return torch.exp(-ang_vel_error / self.cfg.rewards.tracking_sigma)
+        return torch.exp(-ang_vel_error / self.cfg.rewards.tracking_sigma_ang_vel)
 
     def _reward_feet_air_time(self):
         # Reward steps between proper duration
@@ -1224,8 +1233,8 @@ class PointFoot:
 
     def _reward_stand_still(self):
         # Penalize displacement and rotation at zero commands
-        reward_lin = torch.abs(self.base_lin_vel[:, :2]) * (torch.abs(self.commands[:, :2] < 0.1))
-        reward_ang = (torch.abs(self.base_ang_vel[:, -1]) * (torch.abs(self.commands[:, 2] < 0.1))).unsqueeze(dim=-1)
+        reward_lin = torch.abs(self.base_lin_vel[:, :2]) * (torch.abs(self.commands[:, :2]) < 0.1)
+        reward_ang = (torch.abs(self.base_ang_vel[:, -1]) * (torch.abs(self.commands[:, 2]) < 0.1)).unsqueeze(dim=-1)
         return torch.sum(torch.cat((reward_lin, reward_ang), dim=-1), dim=-1)
 
     def _reward_feet_contact_forces(self):
