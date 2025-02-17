@@ -1,5 +1,4 @@
 import os
-import sys
 from typing import Dict
 
 import torch
@@ -870,7 +869,6 @@ class PointFoot:
              3. Store indices of different bodies of the robot
         """
         asset_path = self.cfg.asset.file.format(LEGGED_GYM_ROOT_DIR=LEGGED_GYM_ROOT_DIR)
-        print("asset_path: ",asset_path)
         asset_root = os.path.dirname(asset_path)
         asset_file = os.path.basename(asset_path)
 
