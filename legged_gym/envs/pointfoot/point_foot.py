@@ -194,6 +194,8 @@ class PointFoot:
         self.last_actions[:] = self.actions[:]
         self.last_dof_vel[:] = self.dof_vel[:]
         self.last_root_vel[:] = self.root_states[:, 7:13]
+        self.last_base_lin_vel[:] = self.base_lin_vel[:]
+        self.last_base_ang_vel[:] = self.base_ang_vel[:]
 
         if self.viewer and self.enable_viewer_sync and self.debug_viz:
             self._draw_debug_vis()
@@ -758,7 +760,9 @@ class PointFoot:
         self.rigid_body_external_torques = torch.zeros(
             (self.num_envs, self.num_bodies, 3), device=self.device, requires_grad=False
         )
-
+        self.last_base_lin_vel = torch.zeros(self.num_envs, 3, dtype=torch.float, device=self.device, requires_grad=False)
+        self.last_base_ang_vel = torch.zeros(self.num_envs, 3, dtype=torch.float, device=self.device, requires_grad=False)
+        
         self.base_lin_vel = quat_rotate_inverse(self.base_quat, self.root_states[:, 7:10])
         self.base_ang_vel = quat_rotate_inverse(self.base_quat, self.root_states[:, 10:13])
         self.projected_gravity = quat_rotate_inverse(self.base_quat, self.gravity_vec)
@@ -1156,7 +1160,7 @@ class PointFoot:
 
     def _reward_action_rate(self):
         # Penalize changes in actions
-        return torch.sum(torch.square(self.last_actions - self.actions), dim=1)
+        return torch.sum(torch.square((self.last_actions - self.actions)/ self.dt), dim=1)
 
     def _reward_collision(self):
         # Penalize collisions on selected bodies
@@ -1226,7 +1230,7 @@ class PointFoot:
     def _reward_unbalance_feet_height(self):
         return torch.var(self.last_max_feet_height, dim=-1)
 
-    def _reward_stumble(self):
+    def _reward_feet_stumble(self):
         # Penalize feet hitting vertical surfaces
         return torch.any(torch.norm(self.contact_forces[:, self.feet_indices, :2], dim=2) > \
                          5 * torch.abs(self.contact_forces[:, self.feet_indices, 2]), dim=1)
@@ -1242,6 +1246,9 @@ class PointFoot:
         return torch.sum((torch.norm(self.contact_forces[:, self.feet_indices, :],
                                      dim=-1) - self.cfg.rewards.max_contact_force).clip(min=0.), dim=1)
 
+    # 感觉这里的奖励也有点问题。feet_distance > 0，如果 min_feet_distance=0.1 的话，
+    # 只有 0<feet_distance<0.1 时有惩罚，即惩罚两脚距离太近
+    # 但是现在两只脚距离有点远了，没有任何东西限制距离过远。
     def _reward_feet_distance(self):
         reward = 0
         for i in range(self.feet_state.shape[1] - 1):
@@ -1249,8 +1256,30 @@ class PointFoot:
                 feet_distance = torch.norm(
                     self.feet_state[:, i, :2] - self.feet_state[:, j, :2], dim=-1
                 )
-            reward += torch.clip(self.cfg.rewards.min_feet_distance - feet_distance, 0, 1)
+            reward += torch.clip( torch.square(feet_distance - self.cfg.rewards.des_feet_distance), 0, 1)
         return reward
 
     def _reward_survival(self):
         return (~self.reset_buf).float() * self.dt
+
+    def _reward_lin_acc_x(self):
+        lin_acc_x = torch.square((self.base_lin_vel[:, 0] - self.last_base_lin_vel[:, 0]) / self.dt)
+        return torch.exp(-lin_acc_x / self.cfg.rewards.lin_acc_sigma)
+
+    def _reward_lin_acc_y(self):
+        lin_acc_y = torch.square((self.base_lin_vel[:, 1] - self.last_base_lin_vel[:, 1]) / self.dt)
+        return torch.exp(-lin_acc_y / self.cfg.rewards.lin_acc_sigma)
+
+    def _reward_ang_acc(self):
+        # ang_acc = torch.sum(torch.square(self.base_ang_vel - self.last_base_ang_vel), dim=1)
+        ang_acc = torch.sum(torch.square(self.base_ang_vel - self.last_base_ang_vel), dim=1)
+        return torch.exp(-ang_acc / self.cfg.rewards.ang_acc_sigma)    
+    
+    def _reward_dof_pos_asymmetry(self):
+        # Penalize asymmetry in joint angles
+        hip_pos_L = self.dof_pos[:, 1]
+        knee_pos_L = self.dof_pos[:, 2]
+        hip_pos_R = self.dof_pos[:, 4]
+        knee_pos_R = self.dof_pos[:, 5]
+        asymmetry = torch.square(hip_pos_L - hip_pos_R) + torch.square(knee_pos_L - knee_pos_R)
+        return asymmetry

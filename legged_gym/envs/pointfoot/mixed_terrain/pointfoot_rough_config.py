@@ -41,7 +41,7 @@ class PointFootRoughCfg(BaseConfig):
         curriculum = False     # default: False
         max_curriculum = 1.   # default: 1
         num_commands = 4      # default: lin_vel_x, lin_vel_y, ang_vel_yaw, heading (in heading mode ang_vel_yaw is recomputed from heading error)
-        resampling_time = 3.  # time before command are changed[s]
+        resampling_time = 4.  # time before command are changed[s]
         heading_command = True  # if true: compute ang vel command from heading error
 
         class ranges:
@@ -137,45 +137,51 @@ class PointFootRoughCfg(BaseConfig):
 
     class rewards:
         class scales:
-            action_rate = -0.005     # default: -0.01 惩罚动作变化率
-            ang_vel_xy = -0.2      # default: -0.05 惩罚 x,y 方向的角速度（pitch 和 roll)
-            base_height = -40.0     # default: -10 惩罚 base_height 与 base_height_target 的差异
-            collision = -300.0      # default: -50 惩罚除 foot 外其他关节上的接触力
-            dof_acc = -2.5e-07      # default: -2.5e-07 惩罚关节加速度
+            action_rate = -2e-5     # default: -0.01 惩罚目标关节位置的变化率
+            ang_vel_xy = -0.3      # default: -0.05 惩罚 x,y 方向的角速度（pitch 和 roll)
+            base_height = -60.0     # default: -10 惩罚 base_height 与 base_height_target 的差异
+            collision = -500.0      # default: -50 惩罚除 foot 外其他关节上的接触力
+            dof_acc = -2.5e-06      # default: -2.5e-07 惩罚关节加速度
             dof_pos_limits = -0.0   # default: -0.0 惩罚关节位置超出限制
             dof_vel = -0.0          # default: -0.0 惩罚关节速度
-            feet_air_time = 200      # default: 60 惩罚足部悬空时间不在期望区间内的步态
+            feet_air_time = 300      # default: 60 惩罚足部悬空时间不在期望区间内的步态
             feet_contact_forces = -0.01     # default: -0.01 惩罚过大的足部接触力（没踩稳，使劲跺脚）
-            feet_stumble = -0.0
-            lin_vel_z = -2          # default: -0.5 惩罚 z 方向运动的线速度（上下晃动）
-            no_fly = 1.0            # default: 1.0 奖励单脚触地？
+            feet_stumble = -20.0
+            lin_vel_z = -20          # default: -0.5 惩罚 z 方向运动的线速度（上下晃动）
+            no_fly = 5.0            # default: 1.0 奖励单脚触地？
             orientation = -30.0      # default: -5.0 好像是在 base 不直立的惩罚
             stand_still = -4.0     # default: -1.0 惩罚机器人不能保持静止
             termination = -0.0
-            torque_limits = -0.5
-            torques = -2.5e-05
-            tracking_ang_vel = 10.  # default: 5 跟踪期望角速度奖励
-            tracking_lin_vel_x = 40.0 # default: 10 跟踪期望线速度奖励
-            tracking_lin_vel_y = 10.0 # default: 10 跟踪期望线速度奖励
-            unbalance_feet_air_time = -1000.0   # default: -300 惩罚足部悬空时间不平衡（步态踉跄）
-            unbalance_feet_height = -50.0    # default: -60 惩罚足部高度不平衡
-            feet_distance = -200
-            survival = 200          # default: 100 奖励机器人存活时间
+            torque_limits = -2      # default: -0.5
+            torques = -5e-05      # default: -2.5e-05 惩罚关节力矩
+            tracking_ang_vel = 20.       # default: 5 跟踪期望角速度奖励
+            tracking_lin_vel_x = 20.0   # default: 10 跟踪期望线速度奖励
+            tracking_lin_vel_y = 20.0   # default: 10 跟踪期望线速度奖励
+            unbalance_feet_air_time = -500.0    # default: -300 惩罚足部悬空时间不平衡（步态踉跄）
+            unbalance_feet_height = -50.0       # default: -60 惩罚足部高度不平衡
+            lin_acc_x = 0.5       # 惩罚 base 运动的线加速度
+            lin_acc_y = 1.       # 惩罚 base 运动的线加速度
+            ang_acc = 0.0       # 惩罚 base 运动的角加速度
+            feet_distance = 0.    # default: -100
+            survival = 500          # default: 100 奖励机器人存活时间
+            dof_pos_asymmetry = -0.0  # default: 0.0，这个写的有问题啊
 
         base_height_target = 0.62
         soft_dof_pos_limit = 0.95  # percentage of urdf limits, values above this limit are penalized
         soft_dof_vel_limit = 0.9
-        soft_torque_limit = 0.8
+        soft_torque_limit = 0.7
         max_contact_force = 200.  # forces above this value are penalized
         only_positive_rewards = False  # if true negative total rewards are clipped at zero (avoids early termination problems)
-        min_feet_distance = 0.1
-        # 这两个参数控制步态，每一步的悬空时间
-        min_feet_air_time = 0.25
+        des_feet_distance = 0.17
+        # 这两个参数控制步态，每一步的悬空时间，0.5s with tolerance 0.15s
+        min_feet_air_time = 0.35
         max_feet_air_time = 0.65
         tracking_sigma_x = 0.1  # tracking reward = exp(-error^2/sigma)  # default: 0.25
-        tracking_sigma_y = 0.5  # tracking reward = exp(-error^2/sigma)  # default: 0.25
-        tracking_sigma_ang_vel = 0.25  # tracking reward = exp(-error^2/sigma)  # default: 0.25
-
+        tracking_sigma_y = 0.15  # tracking reward = exp(-error^2/sigma)  # default: 0.25
+        tracking_sigma_ang_vel = 0.15  # tracking reward = exp(-error^2/sigma)  # default: 0.25
+        lin_acc_sigma = 0.2
+        # ang_acc_sigma = 0.5
+        
     class normalization:
         class obs_scales:
             lin_vel = 2.0
@@ -247,7 +253,7 @@ class PointFootRoughCfgPPO(BaseConfig):
         entropy_coef = 0.01
         num_learning_epochs = 5
         num_mini_batches = 4  # mini batch size = num_envs*nsteps / nminibatches
-        learning_rate = 1.e-3  # 5.e-4
+        learning_rate = 5.e-4  # 5.e-4
         schedule = 'adaptive'  # could be adaptive, fixed
         gamma = 0.99
         lam = 0.95
@@ -256,12 +262,13 @@ class PointFootRoughCfgPPO(BaseConfig):
 
     class runner:
         policy_class_name = 'ActorCritic'
+        # policy_class_name = 'ActorCriticRecurrent'
         algorithm_class_name = 'PPO'
         num_steps_per_env = 24  # per iteration
         max_iterations = 100000  # number of policy updates
 
         # logging
-        save_interval = 200  # check for potential saves every this many iterations
+        save_interval = 100  # check for potential saves every this many iterations
         experiment_name = 'pointfoot_rough'
         run_name = ''
         # load and resume
