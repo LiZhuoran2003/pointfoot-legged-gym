@@ -609,7 +609,7 @@ class PointFoot:
         # robots that walked less than half of their required distance go to simpler terrains
         # 调整地形课程降级条件，鼓励挑战高难度
         move_down = (distance < torch.norm(self.commands[env_ids, :2],
-                                           dim=1) * self.max_episode_length_s * 0.1) * ~move_up
+                                           dim=1) * self.max_episode_length_s * 0.25) * ~move_up
         self.terrain_levels[env_ids] += 1 * move_up - 1 * move_down
         # Robots that solve the last level are sent to a random one
         self.terrain_levels[env_ids] = torch.where(self.terrain_levels[env_ids] >= self.max_terrain_level,

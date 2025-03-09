@@ -138,18 +138,18 @@ class PointFootRoughCfg(BaseConfig):
     class rewards:
         class scales:
             action_rate = -2e-5     # default: -0.01 惩罚目标关节位置的变化率
-            ang_vel_xy = -0.3      # default: -0.05 惩罚 x,y 方向的角速度（pitch 和 roll)
-            base_height = -60.0     # default: -10 惩罚 base_height 与 base_height_target 的差异
+            ang_vel_xy = -2      # default: -0.05 惩罚 x,y 方向的角速度（pitch 和 roll)
+            base_height = -100.0     # default: -10 惩罚 base_height 与 base_height_target 的差异
             collision = -500.0      # default: -50 惩罚除 foot 外其他关节上的接触力
-            dof_acc = -2.5e-06      # default: -2.5e-07 惩罚关节加速度
+            dof_vel = -1e-3          # default: -0.0 惩罚关节速度
+            dof_acc = -5e-06      # default: -2.5e-07 惩罚关节加速度
             dof_pos_limits = -0.0   # default: -0.0 惩罚关节位置超出限制
-            dof_vel = -0.0          # default: -0.0 惩罚关节速度
-            feet_air_time = 300      # default: 60 惩罚足部悬空时间不在期望区间内的步态
+            feet_air_time = 100      # default: 60 惩罚足部悬空时间不在期望区间内的步态
             feet_contact_forces = -0.01     # default: -0.01 惩罚过大的足部接触力（没踩稳，使劲跺脚）
             feet_stumble = -20.0
             lin_vel_z = -20          # default: -0.5 惩罚 z 方向运动的线速度（上下晃动）
             no_fly = 5.0            # default: 1.0 奖励单脚触地？
-            orientation = -30.0      # default: -5.0 好像是在 base 不直立的惩罚
+            orientation = -50.0      # default: -5.0 好像是在 base 不直立的惩罚
             stand_still = -4.0     # default: -1.0 惩罚机器人不能保持静止
             termination = -0.0
             torque_limits = -2      # default: -0.5
@@ -159,8 +159,8 @@ class PointFootRoughCfg(BaseConfig):
             tracking_lin_vel_y = 20.0   # default: 10 跟踪期望线速度奖励
             unbalance_feet_air_time = -500.0    # default: -300 惩罚足部悬空时间不平衡（步态踉跄）
             unbalance_feet_height = -50.0       # default: -60 惩罚足部高度不平衡
-            lin_acc_x = 0.5       # 惩罚 base 运动的线加速度
-            lin_acc_y = 1.       # 惩罚 base 运动的线加速度
+            lin_acc_x = 0       # 惩罚 base 运动的线加速度
+            lin_acc_y = 0.       # 惩罚 base 运动的线加速度
             ang_acc = 0.0       # 惩罚 base 运动的角加速度
             feet_distance = 0.    # default: -100
             survival = 500          # default: 100 奖励机器人存活时间
