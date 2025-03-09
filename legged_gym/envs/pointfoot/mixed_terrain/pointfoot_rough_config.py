@@ -47,7 +47,7 @@ class PointFootRoughCfg(BaseConfig):
         class ranges:
             lin_vel_x = [-1.0, 1.0]  # min max [m/s]
             lin_vel_y = [-0.2, 0.2]  # min max [m/s]
-            ang_vel_yaw = [-0.5, 0.5]  # min max [rad/s]
+            ang_vel_yaw = [-0.1, 0.1]  # min max [rad/s]
             heading = [-3.14, 3.14]
 
     class init_state:
@@ -173,8 +173,8 @@ class PointFootRoughCfg(BaseConfig):
         max_contact_force = 200.  # forces above this value are penalized
         only_positive_rewards = False  # if true negative total rewards are clipped at zero (avoids early termination problems)
         min_feet_distance = 0.1
-        # 这两个参数控制步态，每一步的悬空时间
-        min_feet_air_time = 0.25
+        # 这两个参数控制步态，每一步的悬空时间，0.5s with tolerance 0.15s
+        min_feet_air_time = 0.35
         max_feet_air_time = 0.65
         tracking_sigma_x = 0.1  # tracking reward = exp(-error^2/sigma)  # default: 0.25
         tracking_sigma_y = 0.5  # tracking reward = exp(-error^2/sigma)  # default: 0.25
@@ -260,7 +260,8 @@ class PointFootRoughCfgPPO(BaseConfig):
         max_grad_norm = 1.
 
     class runner:
-        policy_class_name = 'ActorCriticRecurrent'
+        policy_class_name = 'ActorCritic'
+        # policy_class_name = 'ActorCriticRecurrent'
         algorithm_class_name = 'PPO'
         num_steps_per_env = 24  # per iteration
         max_iterations = 100000  # number of policy updates

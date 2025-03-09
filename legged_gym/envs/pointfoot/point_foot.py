@@ -898,6 +898,8 @@ class PointFoot:
         # save body names from the asset
         body_names = self.gym.get_asset_rigid_body_names(robot_asset)
         self.dof_names = self.gym.get_asset_dof_names(robot_asset)
+        
+        # print(f"dof_names: {self.dof_names}")
         self.num_bodies = len(body_names)
         self.num_dofs = len(self.dof_names)
         feet_names = [s for s in body_names if self.cfg.asset.foot_name in s]
@@ -1182,6 +1184,7 @@ class PointFoot:
 
     def _reward_torque_limits(self):
         # penalize torques too close to the limit
+        # 可能可以修改一下函数形式？不要用线性的。
         return torch.sum(
             (torch.abs(self.torques) - self.torque_limits * self.cfg.rewards.soft_torque_limit).clip(min=0.), dim=1)
 
@@ -1229,7 +1232,7 @@ class PointFoot:
         return torch.var(self.last_max_feet_height, dim=-1)
 
     def _reward_stumble(self):
-        # Penalize feet hitting vertical surfaces，这一项没用到，看起来是足部受到 x,y 方向的接触力 > 5 倍 z 方向接触力，说明机器人的脚磕到了墙
+        # Penalize feet hitting vertical surfaces，看起来是足部受到 x,y 方向的接触力 > 5 倍 z 方向接触力，说明机器人的脚磕到了台阶/墙
         return torch.any(torch.norm(self.contact_forces[:, self.feet_indices, :2], dim=2) > \
                          5 * torch.abs(self.contact_forces[:, self.feet_indices, 2]), dim=1)
 
