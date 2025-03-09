@@ -33,6 +33,8 @@ from isaacgym import gymapi
 from isaacgym import gymutil
 import numpy as np
 import torch
+# import os
+# os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 # Base class for RL tasks
 class BaseTask():
@@ -91,12 +93,9 @@ class BaseTask():
         # if running with a viewer, set up keyboard shortcuts and camera
         if self.headless == False:
             # subscribe to keyboard shortcuts
-            self.viewer = self.gym.create_viewer(
-                self.sim, gymapi.CameraProperties())
-            self.gym.subscribe_viewer_keyboard_event(
-                self.viewer, gymapi.KEY_ESCAPE, "QUIT")
-            self.gym.subscribe_viewer_keyboard_event(
-                self.viewer, gymapi.KEY_V, "toggle_viewer_sync")
+            self.viewer = self.gym.create_viewer(self.sim, gymapi.CameraProperties())
+            self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_ESCAPE, "QUIT")
+            self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_V, "toggle_viewer_sync")
 
     def get_observations(self):
         return self.obs_buf

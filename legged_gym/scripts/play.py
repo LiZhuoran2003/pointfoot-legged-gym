@@ -33,8 +33,7 @@ import os
 
 import isaacgym
 from legged_gym.envs import *
-from legged_gym.utils import  get_args, export_policy_as_jit, task_registry, Logger
-from export_policy_as_onnx import *
+from legged_gym.utils import get_args, export_policy_as_jit, task_registry, Logger, webviewer
 
 import numpy as np
 import torch
@@ -64,21 +63,30 @@ def play(args):
         path = os.path.join(LEGGED_GYM_ROOT_DIR, 'logs', train_cfg.runner.experiment_name, 'exported', 'policies')
         export_policy_as_jit(ppo_runner.alg.actor_critic, path)
         print('Exported policy as jit script to: ', path)
-        export_policy_as_onnx(args)
 
     logger = Logger(env.dt)
-    robot_index = 0 # which robot is used for logging
-    joint_index = 1 # which joint is used for logging
-    stop_state_log = 100 # number of steps before plotting states
+    robot_index = 0     # which robot is used for logging
+    joint_index = 1     # which joint is used for logging
+    stop_state_log = 1000 # number of steps before plotting states
     stop_rew_log = env.max_episode_length + 1 # number of steps before print average episode rewards
     camera_position = np.array(env_cfg.viewer.pos, dtype=np.float64)
     camera_vel = np.array([1., 1., 0.])
     camera_direction = np.array(env_cfg.viewer.lookat) - np.array(env_cfg.viewer.pos)
     img_idx = 0
+    if args.web:
+        web_viewer = webviewer.WebViewer(logger)
+        web_viewer.setup(env)
+    web_viewer_stop_state_log = False
 
     for i in range(10*int(env.max_episode_length)):
         actions = policy(obs.detach())
         obs, _, rews, dones, infos = env.step(actions.detach())
+        if args.web:
+            web_viewer.render(fetch_results=True,
+                        step_graphics=True,
+                        render_all_camera_sensors=True,
+                        wait_for_page_load=True,
+                        stop_state_log=web_viewer_stop_state_log)
         if RECORD_FRAMES:
             if i % 2:
                 filename = os.path.join(LEGGED_GYM_ROOT_DIR, 'logs', train_cfg.runner.experiment_name, 'exported', 'frames', f"{img_idx}.png")
@@ -106,7 +114,10 @@ def play(args):
                 }
             )
         elif i==stop_state_log:
-            logger.plot_states()
+            if args.web:
+                logger.save_states()
+            else:
+                logger.plot_states()
         if  0 < i < stop_rew_log:
             if infos["episode"]:
                 num_episodes = torch.sum(env.reset_buf).item()

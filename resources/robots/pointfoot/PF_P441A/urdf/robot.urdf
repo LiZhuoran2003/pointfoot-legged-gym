@@ -47,8 +47,7 @@
             <rpyOffsets>0 0 0</rpyOffsets>
         </plugin>
     </gazebo>
-    <link
-            name="base_Link">
+    <link name="base_Link">
         <inertial>
             <origin rpy="0 0 0" xyz="-0.011761 0.000977 -0.015342"/>
             <mass value="8.557"/>
@@ -56,17 +55,12 @@
                      iyy="0.125912" iyz="-0.000664" izz="0.126021"/>
         </inertial>
         <visual>
-            <origin
-                    xyz="0 0 0"
-                    rpy="0 0 0"/>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
-                <mesh
-                        filename="../meshes/base_Link.STL"/>
+                <mesh filename="../meshes/base_Link.STL"/>
             </geometry>
-            <material
-                    name="">
-                <color
-                        rgba="0.79216 0.81961 0.93333 1"/>
+            <material name="">
+                <color rgba="0.79216 0.81961 0.93333 1"/>
             </material>
         </visual>
         <collision>
@@ -76,6 +70,7 @@
             </geometry>
         </collision>
     </link>
+    
     <joint name="limx_imu_joint" type="fixed">
         <origin rpy="0. 0. 0." xyz="0. 0. 0."/>
         <parent link="base_Link"/>
@@ -98,14 +93,15 @@
             <color rgba="255 108 10 255"/>
         </material>
     </link>
+    
     <gazebo reference="limx_imu">
         <material>Gazebo/Orange</material>
     </gazebo>
     <gazebo reference="limx_imu_joint">
         <disableFixedJointLumping>true</disableFixedJointLumping>
     </gazebo>
-    <link
-            name="abad_L_Link">
+    
+    <link name="abad_L_Link">
         <inertial>
             <origin rpy="0 0 0" xyz="-0.067632 0.045448 0.000968"/>
             <mass value="1.614"/>
@@ -113,17 +109,12 @@
                      iyy="0.002726" iyz="-0.000018" izz="0.002429"/>
         </inertial>
         <visual>
-            <origin
-                    xyz="0 0 0"
-                    rpy="0 0 0"/>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
-                <mesh
-                        filename="../meshes/abad_L_Link.STL"/>
+                <mesh filename="../meshes/abad_L_Link.STL"/>
             </geometry>
-            <material
-                    name="">
-                <color
-                        rgba="0.79216 0.81961 0.93333 1"/>
+            <material name="">
+                <color rgba="0.79216 0.81961 0.93333 1"/>
             </material>
         </visual>
         <collision>
@@ -133,22 +124,16 @@
             </geometry>
         </collision>
     </link>
-    <joint
-            name="abad_L_Joint"
-            type="revolute">
-        <origin
-                xyz="0.01241 0.10494 -0.09876"
-                rpy="0 0 0"/>
-        <parent
-                link="base_Link"/>
-        <child
-                link="abad_L_Link"/>
-        <axis
-                xyz="1 0 0"/>
+
+    <joint name="abad_L_Joint" type="revolute">
+        <origin xyz="0.01241 0.10494 -0.09876" rpy="0 0 0"/>
+        <parent link="base_Link"/>
+        <child link="abad_L_Link"/>
+        <axis xyz="1 0 0"/>
         <limit effort="80.0" lower="-0.38397" upper="1.39626" velocity="20.0"/>
     </joint>
-    <link
-            name="hip_L_Link">
+
+    <link name="hip_L_Link">
         <inertial>
             <origin rpy="0 0 0" xyz="-0.030719 -0.045451 -0.043281"/>
             <mass value="2.435"/>
@@ -156,17 +141,12 @@
                      iyy="0.025710" iyz="0.002668" izz="0.010329"/>
         </inertial>
         <visual>
-            <origin
-                    xyz="0 0 0"
-                    rpy="0 0 0"/>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
-                <mesh
-                        filename="../meshes/hip_L_Link.STL"/>
+                <mesh filename="../meshes/hip_L_Link.STL"/>
             </geometry>
-            <material
-                    name="">
-                <color
-                        rgba="1 1 1 1"/>
+            <material name="">
+                <color rgba="1 1 1 1"/>
             </material>
         </visual>
         <collision>
@@ -176,22 +156,16 @@
             </geometry>
         </collision>
     </link>
-    <joint
-            name="hip_L_Joint"
-            type="revolute">
-        <origin
-                xyz="-0.07696 0.02066 0"
-                rpy="0 0 0"/>
-        <parent
-                link="abad_L_Link"/>
-        <child
-                link="hip_L_Link"/>
-        <axis
-                xyz="0 1 0"/>
+
+    <joint name="hip_L_Joint" type="revolute">
+        <origin xyz="-0.07696 0.02066 0" rpy="0 0 0"/>
+        <parent link="abad_L_Link"/>
+        <child link="hip_L_Link"/>
+        <axis xyz="0 1 0"/>
         <limit effort="80.0" lower="-1.012291" upper="1.518436" velocity="20.0"/>
     </joint>
-    <link
-            name="knee_L_Link">
+
+    <link name="knee_L_Link">
         <inertial>
             <origin rpy="0 0 0" xyz="0.048005 -0.000016 -0.076168"/>
             <mass value="0.573"/>
@@ -199,17 +173,12 @@
                      iyy="0.004693" iyz="0.000001" izz="0.001484"/>
         </inertial>
         <visual>
-            <origin
-                    xyz="0 0 0"
-                    rpy="0 0 0"/>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
-                <mesh
-                        filename="../meshes/knee_L_Link.STL"/>
+                <mesh filename="../meshes/knee_L_Link.STL"/>
             </geometry>
-            <material
-                    name="">
-                <color
-                        rgba="0.79216 0.81961 0.93333 1"/>
+            <material name="">
+                <color rgba="0.79216 0.81961 0.93333 1"/>
             </material>
         </visual>
         <collision>
@@ -219,22 +188,15 @@
             </geometry>
         </collision>
     </link>
-    <joint
-            name="knee_L_Joint"
-            type="revolute">
-        <origin
-                xyz="-0.15004 -0.02018 -0.25981"
-                rpy="0 0 0"/>
-        <parent
-                link="hip_L_Link"/>
-        <child
-                link="knee_L_Link"/>
-        <axis
-                xyz="0 -1 0"/>
+
+    <joint name="knee_L_Joint" type="revolute">
+        <origin xyz="-0.15004 -0.02018 -0.25981" rpy="0 0 0"/>
+        <parent link="hip_L_Link"/>
+        <child link="knee_L_Link"/>
+        <axis xyz="0 -1 0"/>
         <limit effort="80" lower="-0.872665" upper="1.396263" velocity="20"/>
     </joint>
-    <link
-            name="foot_L_Link">
+    <link name="foot_L_Link">
         <inertial>
             <origin rpy="0 0 0" xyz="-0.001786 0.000059 0.007911"/>
             <mass value="0.157"/>
@@ -242,17 +204,12 @@
                      iyy="0.000083" iyz="0" izz="0.000061"/>
         </inertial>
         <visual>
-            <origin
-                    xyz="0 0 0"
-                    rpy="0 0 0"/>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
-                <mesh
-                        filename="../meshes/foot_L_Link.STL"/>
+                <mesh filename="../meshes/foot_L_Link.STL"/>
             </geometry>
-            <material
-                    name="">
-                <color
-                        rgba="0.26667 0.26667 0.26667 1"/>
+            <material name="">
+                <color rgba="0.26667 0.26667 0.26667 1"/>
             </material>
         </visual>
         <collision>
@@ -262,19 +219,12 @@
             </geometry>
         </collision>
     </link>
-    <joint
-            name="foot_L_Joint"
-            type="fixed"
-            dont_collapse="true">
-        <origin
-                xyz="0.15 0 -0.25981"
-                rpy="0 0 0"/>
-        <parent
-                link="knee_L_Link"/>
-        <child
-                link="foot_L_Link"/>
-        <axis
-                xyz="0 0 0"/>
+
+    <joint name="foot_L_Joint" type="fixed" dont_collapse="true">
+        <origin xyz="0.15 0 -0.25981" rpy="0 0 0"/>
+        <parent link="knee_L_Link"/>
+        <child link="foot_L_Link"/>
+        <axis xyz="0 0 0"/>
     </joint>
 
     <link name="contact_L_Link">
@@ -284,6 +234,7 @@
             <inertia ixx="1e-12" ixy="0" ixz="0" iyy="1e-12" iyz="0" izz="1e-12"/>
         </inertial>
     </link>
+
     <joint name="contact_L_Joint" type="fixed">
         <origin xyz="0 0 -0.03" rpy="0 0 0"/>
         <parent link="foot_L_Link"/>
@@ -291,14 +242,17 @@
         <axis xyz="0 1 0"/>
         <limit lower="-0" upper="0" effort="60" velocity="50"/>
     </joint>
+    
     <gazebo reference="foot_L_Joint">
         <disableFixedJointLumping>true</disableFixedJointLumping>
     </gazebo>
+    
     <gazebo reference="hip_L_Link">
         <mu1>0.2</mu1>
         <mu2>0.2</mu2>
         <material>Gazebo/DarkGrey</material>
     </gazebo>
+    
     <gazebo reference="knee_L_Link">
         <mu1>0.2</mu1>
         <mu2>0.2</mu2>
@@ -307,6 +261,7 @@
         <kp value="1000000.0"/>
         <kd value="100.0"/>
     </gazebo>
+    
     <gazebo reference="foot_L_Link">
         <mu1>2.0</mu1>
         <mu2>2.0</mu2>
@@ -315,6 +270,7 @@
         <kp value="1000000.0"/>
         <kd value="100.0"/>
     </gazebo>
+    
     <transmission name="abad_L_Joint_tran">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="abad_L_Joint">
@@ -325,6 +281,7 @@
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
+    
     <transmission name="hip_L_Joint_tran">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="hip_L_Joint">
@@ -335,6 +292,7 @@
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
+    
     <transmission name="knee_L_Joint_tran">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="knee_L_Joint">
@@ -346,8 +304,7 @@
         </actuator>
     </transmission>
     
-    <link
-            name="abad_R_Link">
+    <link name="abad_R_Link">
         <inertial>
             <origin rpy="0 0 0" xyz="-0.067632 -0.045448 0.000968"/>
             <mass value="1.614"/>
@@ -355,17 +312,12 @@
                      iyy="0.002726" iyz="0.000018" izz="0.002429"/>
         </inertial>
         <visual>
-            <origin
-                    xyz="0 0 0"
-                    rpy="0 0 0"/>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
-                <mesh
-                        filename="../meshes/abad_R_Link.STL"/>
+                <mesh filename="../meshes/abad_R_Link.STL"/>
             </geometry>
-            <material
-                    name="">
-                <color
-                        rgba="1 1 1 1"/>
+            <material name="">
+                <color rgba="1 1 1 1"/>
             </material>
         </visual>
         <collision>
@@ -375,22 +327,16 @@
             </geometry>
         </collision>
     </link>
-    <joint
-            name="abad_R_Joint"
-            type="revolute">
-        <origin
-                xyz="0.01241 -0.10494 -0.09876"
-                rpy="0 0 0"/>
-        <parent
-                link="base_Link"/>
-        <child
-                link="abad_R_Link"/>
-        <axis
-                xyz="1 0 0"/>
+
+    <joint name="abad_R_Joint" type="revolute">
+        <origin xyz="0.01241 -0.10494 -0.09876" rpy="0 0 0"/>
+        <parent link="base_Link"/>
+        <child link="abad_R_Link"/>
+        <axis xyz="1 0 0"/>
         <limit effort="80.0" lower="-1.39626" upper="0.38397" velocity="20.0"/>
     </joint>
-    <link
-            name="hip_R_Link">
+
+    <link name="hip_R_Link">
         <inertial>
             <origin rpy="0 0 0" xyz="-0.030719 0.045451 -0.043281"/>
             <mass value="2.435"/>
@@ -398,17 +344,12 @@
                      iyy="0.025710" iyz="-0.002668" izz="0.010329"/>
         </inertial>
         <visual>
-            <origin
-                    xyz="0 0 0"
-                    rpy="0 0 0"/>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
-                <mesh
-                        filename="../meshes/hip_R_Link.STL"/>
+                <mesh filename="../meshes/hip_R_Link.STL"/>
             </geometry>
-            <material
-                    name="">
-                <color
-                        rgba="1 1 1 1"/>
+            <material name="">
+                <color rgba="1 1 1 1"/>
             </material>
         </visual>
         <collision>
@@ -418,22 +359,16 @@
             </geometry>
         </collision>
     </link>
-    <joint
-            name="hip_R_Joint"
-            type="revolute">
-        <origin
-                xyz="-0.07696 -0.02066 0"
-                rpy="0 0 0"/>
-        <parent
-                link="abad_R_Link"/>
-        <child
-                link="hip_R_Link"/>
-        <axis
-                xyz="0 -1 0"/>
+
+    <joint name="hip_R_Joint" type="revolute">
+        <origin xyz="-0.07696 -0.02066 0" rpy="0 0 0"/>
+        <parent link="abad_R_Link"/>
+        <child link="hip_R_Link"/>
+        <axis xyz="0 -1 0"/>
         <limit effort="80.0" lower="-1.518436" upper="1.012291" velocity="20.0"/>
     </joint>
-    <link
-            name="knee_R_Link">
+
+    <link name="knee_R_Link">
         <inertial>
             <origin rpy="0 0 0" xyz="0.048005 0.000016 -0.076168"/>
             <mass value="0.573"/>
@@ -441,17 +376,12 @@
                      iyy="0.004693" iyz="-0.000001" izz="0.001484"/>
         </inertial>
         <visual>
-            <origin
-                    xyz="0 0 0"
-                    rpy="0 0 0"/>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
-                <mesh
-                        filename="../meshes/knee_R_Link.STL"/>
+                <mesh filename="../meshes/knee_R_Link.STL"/>
             </geometry>
-            <material
-                    name="">
-                <color
-                        rgba="0.79216 0.81961 0.93333 1"/>
+            <material name="">
+                <color rgba="0.79216 0.81961 0.93333 1"/>
             </material>
         </visual>
         <collision>
@@ -461,22 +391,15 @@
             </geometry>
         </collision>
     </link>
-    <joint
-            name="knee_R_Joint"
-            type="revolute">
-        <origin
-                xyz="-0.15004 0.02018 -0.25981"
-                rpy="0 0 0"/>
-        <parent
-                link="hip_R_Link"/>
-        <child
-                link="knee_R_Link"/>
-        <axis
-                xyz="0 1 0"/>
+
+    <joint name="knee_R_Joint" type="revolute">
+        <origin xyz="-0.15004 0.02018 -0.25981" rpy="0 0 0"/>
+        <parent link="hip_R_Link"/>
+        <child link="knee_R_Link"/>
+        <axis xyz="0 1 0"/>
         <limit effort="80" lower="-1.396263" upper="0.872665" velocity="50"/>
     </joint>
-    <link
-            name="foot_R_Link">
+    <link name="foot_R_Link">
         <inertial>
             <origin rpy="0 0 0" xyz="-0.001786 -0.000059 0.007911"/>
             <mass value="0.157"/>
@@ -484,17 +407,13 @@
                      iyy="0.000083" iyz="0" izz="0.000061"/>
         </inertial>
         <visual>
-            <origin
-                    xyz="0 0 0"
-                    rpy="0 0 0"/>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
-                <mesh
-                        filename="../meshes/foot_R_Link.STL"/>
+                <mesh filename="../meshes/foot_R_Link.STL"/>
             </geometry>
             <material
                     name="">
-                <color
-                        rgba="0.26667 0.26667 0.26667 1"/>
+                <color rgba="0.26667 0.26667 0.26667 1"/>
             </material>
         </visual>
         <collision>
@@ -504,19 +423,12 @@
             </geometry>
         </collision>
     </link>
-    <joint
-            name="foot_R_Joint"
-            type="fixed"
-            dont_collapse="true">
-        <origin
-                xyz="0.15 0 -0.25981"
-                rpy="0 0 0"/>
-        <parent
-                link="knee_R_Link"/>
-        <child
-                link="foot_R_Link"/>
-        <axis
-                xyz="0 0 0"/>
+
+    <joint name="foot_R_Joint" type="fixed" dont_collapse="true">
+        <origin xyz="0.15 0 -0.25981" rpy="0 0 0"/>
+        <parent link="knee_R_Link"/>
+        <child link="foot_R_Link"/>
+        <axis xyz="0 0 0"/>
     </joint>
 
     <link name="contact_R_Link">
@@ -526,6 +438,7 @@
             <inertia ixx="1e-12" ixy="0" ixz="0" iyy="1e-12" iyz="0" izz="1e-12"/>
         </inertial>
     </link>
+
     <joint name="contact_R_Joint" type="fixed">
         <origin xyz="0 0 -0.03" rpy="0 0 0"/>
         <parent link="foot_R_Link"/>
@@ -533,14 +446,17 @@
         <axis xyz="0 1 0"/>
         <limit lower="-0" upper="0" effort="60" velocity="50"/>
     </joint>
+    
     <gazebo reference="foot_R_Joint">
         <disableFixedJointLumping>true</disableFixedJointLumping>
     </gazebo>
+    
     <gazebo reference="hip_R_Link">
         <mu1>0.2</mu1>
         <mu2>0.2</mu2>
         <material>Gazebo/DarkGrey</material>
     </gazebo>
+    
     <gazebo reference="knee_R_Link">
         <mu1>0.2</mu1>
         <mu2>0.2</mu2>
@@ -549,6 +465,7 @@
         <kp value="1000000.0"/>
         <kd value="100.0"/>
     </gazebo>
+    
     <gazebo reference="foot_R_Link">
         <mu1>2.0</mu1>
         <mu2>2.0</mu2>
@@ -557,6 +474,7 @@
         <kp value="1000000.0"/>
         <kd value="100.0"/>
     </gazebo>
+    
     <transmission name="abad_R_Joint_tran">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="abad_R_Joint">
@@ -567,6 +485,7 @@
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
+    
     <transmission name="hip_R_Joint_tran">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="hip_R_Joint">
@@ -577,6 +496,7 @@
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
+    
     <transmission name="knee_R_Joint_tran">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="knee_R_Joint">
@@ -587,4 +507,5 @@
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
+
 </robot>

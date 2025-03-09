@@ -130,6 +130,9 @@ def update_cfg_from_args(env_cfg, cfg_train, args):
         # num envs
         if args.num_envs is not None:
             env_cfg.env.num_envs = args.num_envs
+        if args.seed is not None:
+            env_cfg.seed = args.seed
+
     if cfg_train is not None:
         if args.seed is not None:
             cfg_train.seed = args.seed
@@ -151,7 +154,7 @@ def update_cfg_from_args(env_cfg, cfg_train, args):
 
 def get_args():
     custom_parameters = [
-        {"name": "--task", "type": str, "default": "anymal_c_flat", "help": "Resume training or start testing from a checkpoint. Overrides config file if provided."},
+        {"name": "--task", "type": str, "default": "pointfoot_rough", "help": "Resume training or start testing from a checkpoint. Overrides config file if provided."},
         {"name": "--resume", "action": "store_true", "default": False,  "help": "Resume training from a checkpoint"},
         {"name": "--experiment_name", "type": str,  "help": "Name of the experiment to run or load. Overrides config file if provided."},
         {"name": "--run_name", "type": str,  "help": "Name of the run. Overrides config file if provided."},
@@ -164,6 +167,7 @@ def get_args():
         {"name": "--num_envs", "type": int, "help": "Number of environments to create. Overrides config file if provided."},
         {"name": "--seed", "type": int, "help": "Random seed. Overrides config file if provided."},
         {"name": "--max_iterations", "type": int, "help": "Maximum number of training iterations. Overrides config file if provided."},
+        {"name": "--web", "action": "store_true", "default": False, "help": "if use web viewer"},
     ]
     # parse arguments
     args = gymutil.parse_arguments(
@@ -174,7 +178,7 @@ def get_args():
     args.sim_device_id = args.compute_device_id
     args.sim_device = args.sim_device_type
     if args.sim_device=='cuda':
-        args.sim_device += f":{args.sim_device_id}"
+        args.sim_device += f":{args.sim_device_id}" # cuda:0
     return args
 
 def export_policy_as_jit(actor_critic, path):

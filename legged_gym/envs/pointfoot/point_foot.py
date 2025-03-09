@@ -1,5 +1,4 @@
 import os
-import sys
 from typing import Dict
 
 import torch
@@ -82,17 +81,15 @@ class PointFoot:
         self.viewer = None
 
         # if running with a viewer, set up keyboard shortcuts and camera
-        if self.headless == False:
+        if self.headless == False:  # 不是 headless 模式，允许可视化界面显示
             # subscribe to keyboard shortcuts
-            self.viewer = self.gym.create_viewer(
-                self.sim, gymapi.CameraProperties())
-            self.gym.subscribe_viewer_keyboard_event(
-                self.viewer, gymapi.KEY_ESCAPE, "QUIT")
-            self.gym.subscribe_viewer_keyboard_event(
-                self.viewer, gymapi.KEY_V, "toggle_viewer_sync")
+            self.viewer = self.gym.create_viewer(self.sim, gymapi.CameraProperties())                   # 创建一个可视化窗口
+            self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_ESCAPE, "QUIT")            # ESC键=QUIT
+            self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_V, "toggle_viewer_sync")   # V键=切换视图同步功能
         self._include_feet_height_rewards = self._check_if_include_feet_height_rewards()
         if not self.headless:
             self.set_camera(self.cfg.viewer.pos, self.cfg.viewer.lookat)
+
         self._init_buffers()
         self._prepare_reward_function()
         self.init_done = True
@@ -201,8 +198,11 @@ class PointFoot:
             self._draw_debug_vis()
 
     def _check_if_include_feet_height_rewards(self):
+        # 返回 self.cfg.rewards.scales 对象的所有属性和方法名称的列表。
+        # 列表推导式过滤掉以双下划线开头的属性（这些通常是内部属性），只保留公开的属性名称，结果存储在 members 列表中。
         members = [attr for attr in dir(self.cfg.rewards.scales) if not attr.startswith("__")]
         for scale in members:
+            # 遍历 members 列表中的每一个属性名称，检查是否包含与脚部高度相关的信息
             if "feet_height" in scale:
                 return True
         return False
@@ -353,6 +353,7 @@ class PointFoot:
         )
         return buf
 
+    # 模型输入observation no height
     def _compose_proprioceptive_obs_buf_no_height_measure(self):
         self.proprioceptive_obs_buf = torch.cat((self.base_ang_vel * self.obs_scales.ang_vel,
                                                  self.projected_gravity,    # 投影到 base 坐标系下的重力向量 
@@ -874,7 +875,6 @@ class PointFoot:
              3. Store indices of different bodies of the robot
         """
         asset_path = self.cfg.asset.file.format(LEGGED_GYM_ROOT_DIR=LEGGED_GYM_ROOT_DIR)
-        print("asset_path: ",asset_path)
         asset_root = os.path.dirname(asset_path)
         asset_file = os.path.basename(asset_path)
 
@@ -902,6 +902,8 @@ class PointFoot:
         # save body names from the asset
         body_names = self.gym.get_asset_rigid_body_names(robot_asset)
         self.dof_names = self.gym.get_asset_dof_names(robot_asset)
+        
+        # print(f"dof_names: {self.dof_names}")
         self.num_bodies = len(body_names)
         self.num_dofs = len(self.dof_names)
         feet_names = [s for s in body_names if self.cfg.asset.foot_name in s]
@@ -1130,45 +1132,45 @@ class PointFoot:
 
     # ------------ reward functions----------------
     def _reward_lin_vel_z(self):
-        # Penalize z axis base linear velocity
+        # Penalize z axis base linear velocity，base z轴速度环
         return torch.square(self.base_lin_vel[:, 2])
 
     def _reward_ang_vel_xy(self):
-        # Penalize xy axes base angular velocity
+        # Penalize xy axes base angular velocity，base 的 roll 和 pitch 轴的速度环
         return torch.sum(torch.square(self.base_ang_vel[:, :2]), dim=1)
 
     def _reward_orientation(self):
-        # Penalize non flat base orientation
+        # Penalize non flat base orientation，base 的 roll 和 pitch 轴的位置环
         return torch.sum(torch.square(self.projected_gravity[:, :2]), dim=1)
 
     def _reward_base_height(self):
-        # Penalize base height away from target
+        # Penalize base height away from target，base z轴速度环
         base_height = torch.mean(self.root_states[:, 2].unsqueeze(1) - self.measured_heights, dim=1)
         return torch.square(base_height - self.cfg.rewards.base_height_target)
 
     def _reward_torques(self):
-        # Penalize torques
+        # Penalize torques，能耗惩罚。施加力矩越大，惩罚越大。torque 是对关节位置做 PD 控制计算得到的。
         return torch.sum(torch.square(self.torques), dim=1)
 
     def _reward_dof_vel(self):
-        # Penalize dof velocities
+        # Penalize dof velocities，关节速度环
         return torch.sum(torch.square(self.dof_vel), dim=1)
 
     def _reward_dof_acc(self):
-        # Penalize dof accelerations
+        # Penalize dof accelerations，关节加速度环
         return torch.sum(torch.square((self.last_dof_vel - self.dof_vel) / self.dt), dim=1)
 
     def _reward_action_rate(self):
-        # Penalize changes in actions
-        return torch.sum(torch.square((self.last_actions - self.actions)/ self.dt), dim=1)
+        # Penalize changes in actions，动作变化惩罚，action 就是关节位置，所以这个相当于关节位置环
+        return torch.sum(torch.square(self.last_actions - self.actions), dim=1)
 
     def _reward_collision(self):
-        # Penalize collisions on selected bodies
+        # Penalize collisions on selected bodies，惩罚除了足部以外的关节上的接触力
         return torch.sum(1. * (torch.norm(self.contact_forces[:, self.penalised_contact_indices, :], dim=-1) > 0.1),
                          dim=1)
 
     def _reward_termination(self):
-        # Terminal reward / penalty
+        # Terminal reward / penalty，
         return self.reset_buf * ~self.time_out_buf
 
     def _reward_dof_pos_limits(self):
@@ -1186,6 +1188,7 @@ class PointFoot:
 
     def _reward_torque_limits(self):
         # penalize torques too close to the limit
+        # 可能可以修改一下函数形式？不要用线性的。
         return torch.sum(
             (torch.abs(self.torques) - self.torque_limits * self.cfg.rewards.soft_torque_limit).clip(min=0.), dim=1)
 
@@ -1225,18 +1228,25 @@ class PointFoot:
         return 1. * single_contact
 
     def _reward_unbalance_feet_air_time(self):
+        # 惩罚足部悬空时间方差，鼓励悬空时间尽可能一致，步伐均匀
         return torch.var(self.last_feet_air_time, dim=-1)
 
     def _reward_unbalance_feet_height(self):
+        # 惩罚抬腿高度不一致，鼓励步伐均匀
         return torch.var(self.last_max_feet_height, dim=-1)
 
+<<<<<<< HEAD
     def _reward_feet_stumble(self):
         # Penalize feet hitting vertical surfaces
+=======
+    def _reward_stumble(self):
+        # Penalize feet hitting vertical surfaces，看起来是足部受到 x,y 方向的接触力 > 5 倍 z 方向接触力，说明机器人的脚磕到了台阶/墙
+>>>>>>> c3b1c56e745ab9eb22b2190b31b0917ef2724d4a
         return torch.any(torch.norm(self.contact_forces[:, self.feet_indices, :2], dim=2) > \
                          5 * torch.abs(self.contact_forces[:, self.feet_indices, 2]), dim=1)
 
     def _reward_stand_still(self):
-        # Penalize displacement and rotation at zero commands
+        # Penalize displacement and rotation at zero commands，惩罚机器人在速度指令很小的情况下乱动
         reward_lin = torch.abs(self.base_lin_vel[:, :2]) * (torch.abs(self.commands[:, :2]) < 0.1)
         reward_ang = (torch.abs(self.base_ang_vel[:, -1]) * (torch.abs(self.commands[:, 2]) < 0.1)).unsqueeze(dim=-1)
         return torch.sum(torch.cat((reward_lin, reward_ang), dim=-1), dim=-1)
@@ -1250,6 +1260,7 @@ class PointFoot:
     # 只有 0<feet_distance<0.1 时有惩罚，即惩罚两脚距离太近
     # 但是现在两只脚距离有点远了，没有任何东西限制距离过远。
     def _reward_feet_distance(self):
+        # 鼓励两脚之间保持适当距离
         reward = 0
         for i in range(self.feet_state.shape[1] - 1):
             for j in range(i + 1, self.feet_state.shape[1]):
@@ -1260,6 +1271,7 @@ class PointFoot:
         return reward
 
     def _reward_survival(self):
+        # 存活奖励。episode_length 越长，奖励越大。
         return (~self.reset_buf).float() * self.dt
 
     def _reward_lin_acc_x(self):

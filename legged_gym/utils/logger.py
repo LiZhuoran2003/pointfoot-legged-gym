@@ -32,6 +32,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from collections import defaultdict
 from multiprocessing import Process, Value
+import os
+from io import BytesIO
+import base64
+from legged_gym import LEGGED_GYM_ROOT_DIR
 
 class Logger:
     def __init__(self, dt):
@@ -59,10 +63,16 @@ class Logger:
         self.rew_log.clear()
 
     def plot_states(self):
+        # 启动一个新的进程来运行 _plot 方法
+        # 使用 multiprocessing 模块在单独的进程中运行绘图函数，以避免阻塞主线程。
         self.plot_process = Process(target=self._plot)
         self.plot_process.start()
+        
+    def save_states(self):
+        self.plot_process = Process(target=self._save)
+        self.plot_process.start()
 
-    def _plot(self):
+    def _prepare_figure(self):
         nb_rows = 3
         nb_cols = 3
         fig, axs = plt.subplots(nb_rows, nb_cols)
@@ -70,18 +80,7 @@ class Logger:
             time = np.linspace(0, len(value)*self.dt, len(value))
             break
         log= self.state_log
-        # plot joint targets and measured positions
-        a = axs[1, 0]
-        if log["dof_pos"]: a.plot(time, log["dof_pos"], label='measured')
-        if log["dof_pos_target"]: a.plot(time, log["dof_pos_target"], label='target')
-        a.set(xlabel='time [s]', ylabel='Position [rad]', title='DOF Position')
-        a.legend()
-        # plot joint velocity
-        a = axs[1, 1]
-        if log["dof_vel"]: a.plot(time, log["dof_vel"], label='measured')
-        if log["dof_vel_target"]: a.plot(time, log["dof_vel_target"], label='target')
-        a.set(xlabel='time [s]', ylabel='Velocity [rad/s]', title='Joint Velocity')
-        a.legend()
+       
         # plot base vel x
         a = axs[0, 0]
         if log["base_vel_x"]: a.plot(time, log["base_vel_x"], label='measured')
@@ -99,6 +98,18 @@ class Logger:
         if log["base_vel_yaw"]: a.plot(time, log["base_vel_yaw"], label='measured')
         if log["command_yaw"]: a.plot(time, log["command_yaw"], label='commanded')
         a.set(xlabel='time [s]', ylabel='base ang vel [rad/s]', title='Base velocity yaw')
+        a.legend()
+        # plot joint targets and measured positions
+        a = axs[1, 0]
+        if log["dof_pos"]: a.plot(time, log["dof_pos"], label='measured')
+        if log["dof_pos_target"]: a.plot(time, log["dof_pos_target"], label='target')
+        a.set(xlabel='time [s]', ylabel='Position [rad]', title='DOF Position')
+        a.legend()
+        # plot joint velocity
+        a = axs[1, 1]
+        if log["dof_vel"]: a.plot(time, log["dof_vel"], label='measured')
+        if log["dof_vel_target"]: a.plot(time, log["dof_vel_target"], label='target')
+        a.set(xlabel='time [s]', ylabel='Velocity [rad/s]', title='Joint Velocity')
         a.legend()
         # plot base vel z
         a = axs[1, 2]
@@ -123,7 +134,16 @@ class Logger:
         if log["dof_torque"]!=[]: a.plot(time, log["dof_torque"], label='measured')
         a.set(xlabel='time [s]', ylabel='Joint Torque [Nm]', title='Torque')
         a.legend()
+        return plt
+    
+    def _plot(self):
+        plt = self._prepare_figure()
         plt.show()
+        
+    def _save(self):
+        plt = self._prepare_figure()
+        figure_path = os.path.join(LEGGED_GYM_ROOT_DIR, "legged_gym", "utils", "state_log.jpeg")
+        plt.savefig(figure_path)
 
     def print_rewards(self):
         print("Average rewards per second:")
